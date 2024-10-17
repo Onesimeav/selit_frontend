@@ -1,11 +1,11 @@
 <script setup lang="ts">
- import SearchBar from '@/components/SearchBar.vue'
+ import SearchBar from '@/components/shop/SearchBar.vue'
  import { onMounted, ref } from 'vue'
- import PreviousPageButton from '@/components/PreviousPageButton.vue'
- import Orders from '@/components/Orders.vue'
+ import PreviousPageButton from '@/components/shop/PreviousPageButton.vue'
+ import Orders from '@/components/shop/Orders.vue'
  import { initFlowbite } from 'flowbite'
- import ProductCartButton from '@/components/ProductCartButton.vue'
- import ProductCard from '@/components/ProductCard.vue'
+ import ProductCartButton from '@/components/shop/ProductCartButton.vue'
+ import ProductCard from '@/components/shop/ProductCard.vue'
 
  const isSearchBarBlack = ref(false);
  const product = ref({

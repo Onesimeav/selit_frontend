@@ -1,11 +1,11 @@
 <script setup lang="ts">
 import { onMounted, ref } from 'vue'
 import { initFlowbite } from 'flowbite'
-import ShopHeader from '@/components/ShopHeader.vue'
-import ProductsCarrousel from '@/components/ProductsCarrousel.vue'
-import CategoryLink from '@/components/CategoryLink.vue'
-import ProductCard from '@/components/ProductCard.vue'
-import ProductCartButton from '@/components/ProductCartButton.vue'
+import ShopHeader from '@/components/shop/ShopHeader.vue'
+import ProductsCarrousel from '@/components/shop/ProductsCarrousel.vue'
+import CategoryLink from '@/components/shop/CategoryLink.vue'
+import ProductCard from '@/components/shop/ProductCard.vue'
+import ProductCartButton from '@/components/shop/ProductCartButton.vue'
 const product = ref({
   id:1,
   imageUrl:"https://res.cloudinary.com/dklf43wgz/image/upload/v1726096668/products/images/duiywx39wqpittqrqvkz.jpg",

@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { onMounted, onUnmounted, ref } from 'vue'
-import Orders from '@/components/Orders.vue'
-import SearchBar from '@/components/SearchBar.vue'
+import Orders from '@/components/shop/Orders.vue'
+import SearchBar from '@/components/shop/SearchBar.vue'
 
 const isSearchBarBlack = ref(true);
 const handleScroll = () => {

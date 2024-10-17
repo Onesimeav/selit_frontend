@@ -1,5 +1,5 @@
 <script setup lang="ts">
-  import ProductCard from '@/components/ProductCard.vue'
+  import ProductCard from '@/components/shop/ProductCard.vue'
   import { ref } from 'vue'
   import type { Product } from '@/models/product'
 
