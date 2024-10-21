@@ -1,9 +1,13 @@
 <script setup lang="ts">
-import { onMounted, onUnmounted, ref } from 'vue'
+import { onMounted, onUnmounted, ref, watch } from 'vue'
 import Orders from '@/components/shop/Orders.vue'
 import SearchBar from '@/components/shop/SearchBar.vue'
+import { useShopStore } from '@/stores/shops'
+import type { Shop } from '@/models/shop'
 
 const isSearchBarBlack = ref(true);
+const shopStore = useShopStore();
+const shop = ref<Shop|null>(null);
 const handleScroll = () => {
   const navbar = document.getElementById('navbar');
   const bgImage = document.getElementById('header-background-image');
@@ -24,6 +28,10 @@ const handleScroll = () => {
 }
 onMounted(()=> {
   window.addEventListener('scroll', handleScroll);
+  shop.value=shopStore.shop;
+  watch(() => shopStore.shop, (newShop) => {
+    shop.value = newShop;
+  });
 })
 
 onUnmounted(()=>{
@@ -33,7 +41,7 @@ onUnmounted(()=>{
 
 <template>
   <nav id="navbar" class="sticky -top-0.5 z-40 transition-colors duration-300 drop-shadow-md">
-    <div id="header-background-image" class="relative py-2.5 bg-center bg-cover h-full w-full" style="background-image: url('https://res.cloudinary.com/dklf43wgz/image/upload/c_crop,w_5472,h_3081,x_0,y_395,ar_16:9/v1726095886/shops/banner/habb3y7qrus8nkkv9r11.jpg')">
+    <div id="header-background-image" class="relative py-2.5 bg-center bg-cover h-full w-full" :style="{backgroundImage:`url(${shop?.banner})` } ">
       <div id="navbarChild" class="container">
         <div class="absolute inset-0 bg-black opacity-50"></div>
         <div class="relative z-10 flex justify-end px-2.5">
@@ -41,8 +49,8 @@ onUnmounted(()=>{
         </div>
         <div class=" relative z-10 grid grid-cols-8 items-center ">
           <div class=" col-span-7 m-4 pl-16 flex flex-col items-center">
-            <img class=" w-32 h-32 rounded-full opacity-100" src="https://res.cloudinary.com/dklf43wgz/image/upload/v1726095885/shops/logo/b4jso9vtegjeqtzno7ax.jpg" alt="Shop Logo">
-            <h1 class="font-sora font-extra-bold text-5xl text-white ">SanDiego</h1>
+            <img class=" w-32 h-32 rounded-full opacity-100" v-if="shop" :src="shop.logo" alt="Shop Logo">
+            <h1 class="font-sora font-extra-bold text-5xl text-white ">{{shop?.name}}</h1>
           </div>
           <!-- Modal toggle -->
           <div class="col-span-1 flex flex-col items-start justify-start h-full">
@@ -57,7 +65,7 @@ onUnmounted(()=>{
         </div>
       </div>
       <div id="default-search" class=" relative z-10">
-        <SearchBar :black-version="isSearchBarBlack"/>
+        <SearchBar :black-version="isSearchBarBlack" v-if="shop?.name" :shop-name="shop.name"/>
       </div>
     </div>
 

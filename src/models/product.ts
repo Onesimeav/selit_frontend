@@ -1,5 +1,15 @@
+import type { Media } from '@/models/media'
+import type { Specification } from '@/models/specification'
+import type { Promotion } from '@/models/promotion'
+
 export interface Product {
-  imageUrl: string;
-  name: string;
-  price: number;
+  id:                    number;
+  name:                  string;
+  description:           string;
+  price:                 number;
+  owner_id:              number;
+  shop_id:               number;
+  medias:                Media[];
+  specifications:        Specification[];
+  auto_apply_promotions: Promotion[];
 }

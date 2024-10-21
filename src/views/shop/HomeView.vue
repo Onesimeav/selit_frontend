@@ -1,18 +1,12 @@
 <script setup lang="ts">
-import { onMounted, ref } from 'vue'
+import { onMounted } from 'vue'
 import { initFlowbite } from 'flowbite'
 import ShopHeader from '@/components/shop/ShopHeader.vue'
 import ProductsCarrousel from '@/components/shop/ProductsCarrousel.vue'
 import CategoryLink from '@/components/shop/CategoryLink.vue'
-import ProductCard from '@/components/shop/ProductCard.vue'
 import ProductCartButton from '@/components/shop/ProductCartButton.vue'
-const product = ref({
-  id:1,
-  imageUrl:"https://res.cloudinary.com/dklf43wgz/image/upload/v1726096668/products/images/duiywx39wqpittqrqvkz.jpg",
-  name:'Apple Watch Series 7 GPS, Aluminium Case, Starlight Sport',
-  price:599
-  });
-const products = ref([product.value,product.value,product.value,product.value,product.value,product.value,product.value,product.value,product.value,])
+import ProductList from '@/components/shop/ProductList.vue'
+
 onMounted( ()=>{
   initFlowbite()
 })
@@ -21,26 +15,10 @@ onMounted( ()=>{
 <template>
   <ShopHeader/>
   <CategoryLink class="mt-3"/>
-  <ProductsCarrousel :products="products"/>
+  <ProductsCarrousel/>
   <CategoryLink/>
-  <ProductsCarrousel :products="products"/>
+  <ProductsCarrousel/>
   <p class="text-black font-rubik font-semibold text-heading-2 mx-2.5">Tout les produits</p>
-  <div class="flex flex-wrap items-center justify-evenly">
-    <div class="w-5/12">
-      <ProductCard :product="product" />
-    </div>
-    <div class="w-5/12">
-      <ProductCard :product="product" />
-    </div>
-    <div class="w-5/12">
-      <ProductCard :product="product" />
-    </div>
-    <div class="w-5/12">
-      <ProductCard :product="product" />
-    </div>
-    <div class="w-5/12">
-      <ProductCard :product="product" />
-    </div>
-  </div>
+  <ProductList/>
   <ProductCartButton/>
 </template>
