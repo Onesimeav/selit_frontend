@@ -5,7 +5,7 @@
  import Orders from '@/components/shop/Orders.vue'
  import { initFlowbite } from 'flowbite'
  import ProductCartButton from '@/components/shop/ProductCartButton.vue'
- import ProductList from '@/components/shop/ProductList.vue'
+ import CategoryProductsList from '@/components/shop/CategoryProductsList.vue'
 
  const isSearchBarBlack = ref(false);
  onMounted( ()=>{
@@ -21,8 +21,8 @@
     </div>
     <Orders/>
   </div>
-  <p class="text-black font-rubik font-semibold text-heading-2 mx-2.5">Tout les produits</p>
-  <ProductList/>
+  <p class="text-black font-rubik font-semibold text-heading-2 m-2.5">{{$route.params.name}}</p>
+  <CategoryProductsList :category-id="Number($route.params.id)"/>
   <ProductCartButton/>
 </template>
 

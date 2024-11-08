@@ -2,7 +2,7 @@
 import { onMounted, onUnmounted, ref, watch } from 'vue'
 import Orders from '@/components/shop/Orders.vue'
 import SearchBar from '@/components/shop/SearchBar.vue'
-import { useShopStore } from '@/stores/shops'
+import { useShopStore } from '@/stores/shop/shops'
 import type { Shop } from '@/models/shop'
 
 const isSearchBarBlack = ref(true);
@@ -45,8 +45,8 @@ onUnmounted(()=>{
       <div id="navbarChild" class="container">
         <div class="absolute inset-0 bg-black opacity-50"></div>
         <div class="relative z-10 flex justify-end px-2.5">
-
         </div>
+
         <div class=" relative z-10 grid grid-cols-8 items-center ">
           <div class=" col-span-7 m-4 pl-16 flex flex-col items-center">
             <img class=" w-32 h-32 rounded-full opacity-100" v-if="shop" :src="shop.logo" alt="Shop Logo">

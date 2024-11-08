@@ -10,10 +10,22 @@ const shopRouter = createRouter({
       component: HomeView
     },
     {
-      path:'/category',
+      path:'/category/:name/:id',
       name:'category',
       component: ()=> import('../views/shop/CategoryView.vue'),
     },
+
+    {
+      path:'/product/:id',
+      name:'product-details',
+      component:()=>import('../views/shop/ProductDetailsView.vue'),
+    },
+    {
+      path:'/cart',
+      name:'cart',
+      component:()=>import('../views/shop/CartView.vue'),
+    },
+
     {
       path:'/404',
       component:()=>import('../views/shop/404.vue'),

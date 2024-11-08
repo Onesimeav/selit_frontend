@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { useShopStore } from '@/stores/shops'
+import { useShopStore } from '@/stores/shop/shops'
 import { onMounted, ref, watch } from 'vue'
 
 const props = defineProps<{
@@ -9,10 +9,17 @@ const shopStore = useShopStore();
 const shopName = ref<string|null>(null);
 
 onMounted(()=>{
-  shopName.value=shopStore.shop!.name;
+  if (shopStore.shop)
+  {
+    shopName.value=shopStore.shop.name;
+  }
+
 
   watch(()=>shopStore.shop, (newShop)=>{
-    shopName.value=newShop!.name
+    if (newShop)
+    {
+      shopName.value=newShop.name;
+    }
   })
 })
 </script>
