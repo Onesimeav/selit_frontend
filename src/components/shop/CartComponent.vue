@@ -8,9 +8,14 @@ import { useProductStore } from '@/stores/shop/products'
 import CartProductCard from '@/components/shop/CartProductCard.vue'
 import PlaceOrderButton from '@/components/shop/PlaceOrderButton.vue'
 import PromotionComponent from '@/components/shop/PromotionComponent.vue'
+import type { CartProductRequest, CreateOrder } from '@/requests/create-order'
+import { useShopStore } from '@/stores/shop/shops'
+import { useRouter } from 'vue-router'
 
+const  route = useRouter();
 const cartStore = useCartStore();
 const productStore = useProductStore();
+const shopStore = useShopStore();
 const products = ref<(Product & { quantity: number, promotions?:number[] })[]>([]);
 const cartTotal = ref(0);
 const getProducts = async () => {
@@ -35,6 +40,32 @@ const getProducts = async () => {
   }
 };
 
+const placeOrder=async (userInfo: { name: string, surname: string, email: string, number: number, }) => {
+  if (shopStore.shop && cartStore.products) {
+    const product: CartProductRequest[] = [];
+    cartStore.products.forEach(p => {
+      product.push({
+        product_id: p.id,
+        quantity: p.quantity,
+        promotion_id: p.promotions
+      })
+    })
+    const order: CreateOrder = {
+      shop_id: shopStore.shop.id,
+      name: userInfo.name,
+      surname: userInfo.surname,
+      email: userInfo.email,
+      number: userInfo.number,
+      products: product,
+    }
+    if (await cartStore.placeOrder(order)) {
+      await route.push('/');
+    }else {
+      console.log("Une erreur s'est produite")
+    }
+  }
+
+}
 
 const getCartTotal = (productPrice:number)=>{
   cartTotal.value+=productPrice;
@@ -69,7 +100,7 @@ onMounted(getProducts);
     <span class="text-appGray">Total:</span>
     <span class="text-black">{{cartTotal}}</span>
   </p>
-  <PlaceOrderButton :disable="canPlaceOrder"/>
+  <PlaceOrderButton @place-order="userInfo => placeOrder(userInfo)"/>
 
 </template>
 

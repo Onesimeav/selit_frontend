@@ -1,6 +1,7 @@
 import { defineStore } from 'pinia'
 import axios from 'axios'
 import type { Promotion } from '@/models/promotion'
+import type { CreateOrder } from '@/requests/create-order'
 
 export const useCartStore = defineStore('cart',{
   state() {
@@ -218,6 +219,13 @@ export const useCartStore = defineStore('cart',{
         this.loading=false;
         return apiResponse.data.promotion;
       }
+    },
+
+    async placeOrder(order:CreateOrder):Promise<boolean>{
+      this.loading=true;
+      const  apiResponse = await axios.post('orders',order);
+      this.loading=false;
+      return  apiResponse.status<400;
     }
   }
 })

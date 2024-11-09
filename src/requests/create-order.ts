@@ -1,14 +1,14 @@
 export interface CreateOrder {
-  shop_id:  string;
+  shop_id:  number;
   name:     string;
   surname:  string;
   email:    string;
-  number:   string;
-  products: Product[];
+  number:   number;
+  products: CartProductRequest[];
 }
 
-export interface Product {
-  product_id:   string;
-  quantity:     string;
-  promotion_id: number[];
+export interface CartProductRequest {
+  product_id:   number;
+  quantity:     number;
+  promotion_id?: number[];
 }
