@@ -29,7 +29,7 @@ const router = ()=>{
   return routes;
 }
 app.config.globalProperties.$axios = axios;
-axios.defaults.baseURL='http://127.0.0.1:8000/api/v1';
+axios.defaults.baseURL='https://api.selit.store/api/v1';
 app.use(createPinia())
 app.use(router())
 app.mount('#app')
