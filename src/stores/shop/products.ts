@@ -50,6 +50,7 @@ export const useProductStore = defineStore('product',{
     async getProduct(id:number):Promise<Product>{
       this.loading=true;
       const apiResponse = await axios.get(`/products/get-product/${id}`);
+      this.loading=false;
       if (apiResponse.status>=400){
         return Promise.reject();
       }else{
