@@ -21,7 +21,7 @@ import { useOrderStore } from '@/stores/shop/orders'
     })
   }
 
-const verifyOrder = async (response) =>{
+const verifyOrder = async (response:{transactionId:string}) =>{
   if (await orderStore.verifyOrderPayment(props.orderReference,response.transactionId)){
     emit('orderPayed');
   }

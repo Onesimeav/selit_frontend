@@ -69,7 +69,7 @@
 
   const pusher = new Pusher(import.meta.env.VITE_PUSHER_KEY,{cluster:import.meta.env.VITE_PUSHER_CLUSTER});
   const channel = pusher.subscribe(`order-status-${props.orderId}`);
-  channel.bind('order-status-change',function(data){
+  channel.bind('order-status-change',function(data:{orderId:number,orderStatus:string}){
     orderStatus.value=data.orderStatus;
     setOrderStep();
   })
