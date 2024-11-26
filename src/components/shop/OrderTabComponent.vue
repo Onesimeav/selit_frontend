@@ -29,17 +29,17 @@
   </div>
   <div id="default-styled-tab-content">
     <div class="hidden p-4 rounded-lg bg-gray-50 dark:bg-gray-800" id="styled-processing" role="tabpanel" aria-labelledby="profile-tab">
-      <div v-for="(order, id) in ordersInProcessing" :key="id">
+      <div v-for="(order, id) in props.ordersInProcessing" :key="id">
         <order-card :order="order"/>
       </div>
     </div>
     <div class="hidden p-4 rounded-lg bg-gray-50 dark:bg-gray-800" id="styled-delivered" role="tabpanel" aria-labelledby="dashboard-tab">
-      <div v-for="(order, id) in ordersFinished" :key="id">
+      <div v-for="(order, id) in props.ordersFinished" :key="id">
         <order-card :order="order"/>
       </div>
     </div>
     <div class="hidden p-4 rounded-lg bg-gray-50 dark:bg-gray-800" id="styled-cancelled" role="tabpanel" aria-labelledby="settings-tab">
-      <div v-for="(order, id) in ordersCancelled" :key="id">
+      <div v-for="(order, id) in props.ordersCancelled" :key="id">
         <order-card :order="order"/>
       </div>
     </div>
