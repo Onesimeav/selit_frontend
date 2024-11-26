@@ -6,7 +6,10 @@
  import { initFlowbite } from 'flowbite'
  import ProductCartButton from '@/components/shop/ProductCartButton.vue'
  import CategoryProductsList from '@/components/shop/CategoryProductsList.vue'
+ import { useOrderStore } from '@/stores/shop/orders'
 
+ const orderStore = useOrderStore();
+ const ordersId = orderStore.ordersId;
  const isSearchBarBlack = ref(false);
  onMounted( ()=>{
    initFlowbite()
@@ -19,7 +22,10 @@
       <PreviousPageButton/>
       <SearchBar :black-version="isSearchBarBlack" />
     </div>
-    <Orders/>
+    <div v-if="ordersId">
+      <Orders v-if="ordersId.length>=1" :orders-count="ordersId.length"/>
+    </div>
+
   </div>
   <p class="text-black font-rubik font-semibold text-heading-2 m-2.5">{{$route.params.name}}</p>
   <CategoryProductsList :category-id="Number($route.params.id)"/>

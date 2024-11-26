@@ -16,7 +16,9 @@
   "dependencies": {
     "axios": "^1.7.7",
     "flowbite": "^2.5.2",
+    "kkiapay": "^2.0.26",
     "pinia": "^2.2.4",
+    "pusher-js": "^8.4.0-rc2",
     "vue": "^3.5.11",
     "vue-router": "^4.4.5"
   },

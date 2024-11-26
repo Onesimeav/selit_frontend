@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { onMounted, ref, watch } from 'vue'
 import { useCartStore } from '@/stores/shop/carts'
-import { initFlowbite } from 'flowbite'
+import { initFlowbite, Modal } from 'flowbite'
 
 const disable = ref(true);
 const cartStore = useCartStore();
@@ -24,6 +24,9 @@ const validateOrderInfo = ()=>{
 }
 const placeOrder=()=>{
   if (validateOrderInfo()){
+    const modalElement = document.getElementById('authentication-modal');
+    const modal = new Modal(modalElement);
+    modal.hide();
     emit('placeOrder',order.value as {name:string, surname: string, email: string, number: number,})
   }else {
     console.log('fill all the input of the form')

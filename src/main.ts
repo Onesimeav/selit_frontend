@@ -8,6 +8,7 @@ import App from './App.vue'
 import shopRouter from '@/router/shopRouter'
 import dashboardRouter from './router'
 import axios from 'axios'
+
 const app = createApp(App)
 
 const host = window.location.host;
@@ -29,7 +30,7 @@ const router = ()=>{
   return routes;
 }
 app.config.globalProperties.$axios = axios;
-axios.defaults.baseURL='https://api.selit.store/api/v1';
+axios.defaults.baseURL='https://selit-backend.onrender.com/api/v1';
 app.use(createPinia())
 app.use(router())
 app.mount('#app')

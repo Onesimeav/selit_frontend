@@ -27,6 +27,17 @@ const shopRouter = createRouter({
     },
 
     {
+      path:'/orders',
+      name:'orders',
+      component:()=>import('../views/shop/OrdersView.vue'),
+    },
+    {
+      path:'/order/:id',
+      name:'order-details',
+      component:()=>import('../views/shop/OrderDetailsView.vue'),
+    },
+
+    {
       path:'/404',
       component:()=>import('../views/shop/404.vue'),
     }

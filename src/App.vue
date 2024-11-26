@@ -5,6 +5,7 @@ import { onMounted } from 'vue'
 import { useProductStore } from '@/stores/shop/products'
 import { useCategoryStore } from '@/stores/shop/categories'
 import { useCartStore } from '@/stores/shop/carts'
+import { useOrderStore } from '@/stores/shop/orders'
 
 const router = useRouter();
 const host = window.location.host;
@@ -21,10 +22,12 @@ if (subdomain[0]==='www'){
       const productStore = useProductStore();
       const categoryStore = useCategoryStore();
       const cartStore = useCartStore();
+      const orderStore = useOrderStore();
       await productStore.getProducts();
       await categoryStore.getCategory();
       cartStore.getCart();
       await cartStore.getCartPromotions();
+      orderStore.getLocalOrders();
     }
   })
 }

@@ -4,10 +4,13 @@ import Orders from '@/components/shop/Orders.vue'
 import SearchBar from '@/components/shop/SearchBar.vue'
 import { useShopStore } from '@/stores/shop/shops'
 import type { Shop } from '@/models/shop'
+import { useOrderStore } from '@/stores/shop/orders'
 
 const isSearchBarBlack = ref(true);
 const shopStore = useShopStore();
 const shop = ref<Shop|null>(null);
+const orderStore = useOrderStore();
+const ordersId = ref<number[]>();
 const handleScroll = () => {
   const navbar = document.getElementById('navbar');
   const bgImage = document.getElementById('header-background-image');
@@ -26,12 +29,22 @@ const handleScroll = () => {
     }
   }
 }
+const getOrders = ()=>{
+  if (orderStore.ordersId){
+    ordersId.value= orderStore.ordersId
+  }
+}
 onMounted(()=> {
   window.addEventListener('scroll', handleScroll);
   shop.value=shopStore.shop;
+  getOrders();
   watch(() => shopStore.shop, (newShop) => {
     shop.value = newShop;
   });
+})
+
+watch(()=>orderStore.ordersId,(newOrdersIds)=>{
+  if (newOrdersIds) ordersId.value=newOrdersIds;
 })
 
 onUnmounted(()=>{
@@ -50,7 +63,7 @@ onUnmounted(()=>{
         <div class=" relative z-10 grid grid-cols-8 items-center ">
           <div class=" col-span-7 m-4 pl-16 flex flex-col items-center">
             <img class=" w-32 h-32 rounded-full opacity-100" v-if="shop" :src="shop.logo" alt="Shop Logo">
-            <h1 class="font-sora font-extra-bold text-5xl text-white ">{{shop?.name}}</h1>
+            <h1 class="font-sora font-extra-bold text-4xl text-white ">{{shop?.name}}</h1>
           </div>
           <!-- Modal toggle -->
           <div class="col-span-1 flex flex-col items-start justify-start h-full">
@@ -68,8 +81,10 @@ onUnmounted(()=>{
         <SearchBar :black-version="isSearchBarBlack" v-if="shop?.name" :shop-name="shop.name"/>
       </div>
     </div>
+    <div v-if="ordersId">
+      <Orders v-if="ordersId.length>=1" :orders-count="ordersId.length"/>
+    </div>
 
-    <Orders/>
 
   </nav>
 
