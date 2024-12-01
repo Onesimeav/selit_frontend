@@ -2,36 +2,63 @@
 import { onMounted, ref, watch } from 'vue'
 import { useCartStore } from '@/stores/shop/carts'
 import { initFlowbite, Modal } from 'flowbite'
+import MapComponent from '@/components/shop/MapComponent.vue'
 
-const disable = ref(true);
+const disable = ref(false);
+const showMap = ref(false);
 const cartStore = useCartStore();
 const order = ref({
   name: "",
   surname: "",
   email: "",
   number: null as number|null,
+  address:"",
+  latitude:null as number|null,
+  longitude:null as number|null,
 })
 const emit = defineEmits<{
     (event:'placeOrder',
      userInfo:{name:string,
       surname: string,
       email: string,
-      number: number,}
-    ):{name:string, surname: string, email: string, number: number,};
+      number: number,
+      address:string,
+      latitude:number,
+      longitude:number}):void;
   }>()
 const validateOrderInfo = ()=>{
   return order.value.name && order.value.surname && order.value.email && order.value.number;
 }
-const placeOrder=()=>{
+const validatePositionInfo =()=>{
+  return order.value.address && order.value.latitude && order.value.longitude;
+}
+
+const orderFormNextStep = ()=>{
   if (validateOrderInfo()){
-    const modalElement = document.getElementById('authentication-modal');
-    const modal = new Modal(modalElement);
-    modal.hide();
-    emit('placeOrder',order.value as {name:string, surname: string, email: string, number: number,})
+    showMap.value=true;
   }else {
     console.log('fill all the input of the form')
   }
 }
+
+const updateOrderInfo = (address:string,position:{lat:number,lng:number})=>{
+  order.value.address=address;
+  order.value.latitude=position.lat;
+  order.value.longitude=position.lng;
+}
+
+const placeOrder=()=>{
+  if (validateOrderInfo() && validatePositionInfo()){
+    const modalElement = document.getElementById('authentication-modal');
+    const modal = new Modal(modalElement);
+    modal.hide();
+    emit('placeOrder',order.value as {name:string, surname: string, email: string, number: number,address:string, latitude:number, longitude:number})
+  }else {
+    console.log('fill all the input of the form')
+  }
+}
+
+
 watch(()=>cartStore.loading,(newLoading)=>{
   disable.value = newLoading;
 })
@@ -63,7 +90,7 @@ onMounted(initFlowbite);
         </div>
         <!-- Modal body -->
         <div class="p-4 md:p-5">
-          <form class="space-y-4" @submit.prevent="placeOrder()">
+          <form id="order-form" v-if="!showMap" class="space-y-4" @submit.prevent="orderFormNextStep">
             <div>
               <label for="email" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Email</label>
               <input type="email" v-model="order.email" name="email" id="email" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white" placeholder="name@company.com" required />
@@ -87,8 +114,15 @@ onMounted(initFlowbite);
                 <input type="tel" v-model="order.number" id="phone-input" aria-describedby="helper-text-explanation" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full ps-10 p-2.5  dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" pattern="[0-9]{2}[0-9]{2}[0-9]{2}[0-9]{2}" placeholder="12345678" required />
               </div>
             </div>
-            <button type="submit" class="w-full text-white bg-appBlack hover:bg-black  focus:outline-none font-rubik font-medium rounded-lg text-sm px-5 py-2.5 text-center dark:bg-blue-600 dark:hover:bg-blue-700 ">Confirmer commande</button>
+            <button type="submit" class="w-full text-white bg-appBlack hover:bg-black  focus:outline-none font-rubik font-medium rounded-lg text-sm px-5 py-2.5 text-center dark:bg-blue-600 dark:hover:bg-blue-700 ">Continuer</button>
           </form>
+          <div v-if="showMap" class="w-full h-[80vh]">
+            <div class="h-[75vh] mb-3">
+              <map-component @user-position="updateOrderInfo"/>
+            </div>
+
+            <button type="button" @click="placeOrder" class="w-full text-white bg-appBlack hover:bg-black  focus:outline-none font-rubik font-medium rounded-lg text-sm px-5 py-2.5 text-center dark:bg-blue-600 dark:hover:bg-blue-700 ">Confirmer commande</button>
+          </div>
         </div>
       </div>
     </div>

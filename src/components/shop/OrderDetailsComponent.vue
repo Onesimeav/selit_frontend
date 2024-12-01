@@ -8,6 +8,8 @@
   import OrderSummaryCard from '@/components/shop/OrderSummaryCard.vue'
   import CancelOrderButton from '@/components/shop/CancelOrderButton.vue'
   import PayOrderButton from '@/components/shop/PayOrderButton.vue'
+  import type { DeliveryMan } from '@/models/deliveryMan'
+  import DeliveryManCard from '@/components/shop/DeliveryManCard.vue'
 
   const props = defineProps<{
     orderId:number;
@@ -18,7 +20,7 @@
   const step = ref<number>(1);
   const orderProducts = ref<OrderProduct[]>();
   const  orderPrice = ref<number>(0);
-
+  const deliveryMan = ref<DeliveryMan>();
 
   const getOrderDetails = async () => {
     const response = await orderStore.getOrder([props.orderId]);
@@ -44,6 +46,7 @@
           break;
       case 'Delivery in progress':
           step.value=3;
+          getDeliveryMan();
           break;
       case 'Delivered':
           step.value=4;
@@ -65,6 +68,13 @@
         step.value=6;
       }
     }
+  }
+
+  const getDeliveryMan = async ()=>{
+    if (order.value){
+      deliveryMan.value = await orderStore.getDeliverymanInfo(order.value.order_reference)
+    }
+
   }
 
   const pusher = new Pusher(import.meta.env.VITE_PUSHER_KEY,{cluster:import.meta.env.VITE_PUSHER_CLUSTER});
@@ -108,7 +118,7 @@
     <p class="font-rubik font-regular text-normal-text text-appGray mx-4">Numéro de référence</p>
     <p class="font-rubik font-regular text-normal-text mx-4 mb-2">{{order.order_reference}}</p>
     <p class="font-rubik font-regular text-normal-text text-appGray mx-4">Addresse</p>
-    <p class="font-rubik font-regular text-normal-text mx-4">{{order.location}}</p>
+    <p class="font-rubik font-regular text-normal-text mx-4">{{order.address}}</p>
 
     <p class="font-rubik font-semibold text-heading-3 mx-4 mt-4 ">Résumé de la commande</p>
     <div v-if=" orderProducts" >
@@ -116,6 +126,8 @@
           <order-summary-card :order-product="orderProduct"/>
       </div>
     </div>
+
+    <delivery-man-card v-if="deliveryMan" :delivery-man="deliveryMan"/>
 
     <div class="fixed z-10  bottom-0 w-full shadow-top">
       <div class="mx-4 mt-2 mb-20">

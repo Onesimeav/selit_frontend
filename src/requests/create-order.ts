@@ -4,6 +4,9 @@ export interface CreateOrder {
   surname:  string;
   email:    string;
   number:   number;
+  address:string;
+  location_latitude:number;
+  location_longitude:number;
   products: CartProductRequest[];
 }
 

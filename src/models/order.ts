@@ -5,7 +5,9 @@ export interface Order {
   surname:         string;
   email:           string;
   number:          number;
-  location:        string;
+  address:         string;
+  location_latitude:number;
+  location_longitude:number;
   status:          string;
   shop_id:         number;
   orderProducts:   OrderProduct[];

@@ -40,7 +40,7 @@ const getProducts = async () => {
   }
 };
 
-const placeOrder=async (userInfo: { name: string, surname: string, email: string, number: number, }) => {
+const placeOrder=async (userInfo: { name: string, surname: string, email: string, number: number, address:string, latitude:number, longitude:number}) => {
   if (shopStore.shop && cartStore.products) {
     const product: CartProductRequest[] = [];
     cartStore.products.forEach(p => {
@@ -56,6 +56,9 @@ const placeOrder=async (userInfo: { name: string, surname: string, email: string
       surname: userInfo.surname,
       email: userInfo.email,
       number: userInfo.number,
+      address:userInfo.address,
+      location_latitude:userInfo.latitude,
+      location_longitude:userInfo.longitude,
       products: product,
     }
     if (await cartStore.placeOrder(order)) {
@@ -100,8 +103,7 @@ onMounted(getProducts);
     <span class="text-appGray">Total:</span>
     <span class="text-black">{{cartTotal}}</span>
   </p>
-  <PlaceOrderButton @place-order="userInfo => placeOrder(userInfo)"/>
-
+  <PlaceOrderButton @place-order="placeOrder"/>
 </template>
 
 <style scoped>
