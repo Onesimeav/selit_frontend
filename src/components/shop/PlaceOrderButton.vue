@@ -4,7 +4,7 @@ import { useCartStore } from '@/stores/shop/carts'
 import { initFlowbite, Modal } from 'flowbite'
 import MapComponent from '@/components/shop/MapComponent.vue'
 
-const disable = ref(false);
+const disable = ref(true);
 const showMap = ref(false);
 const cartStore = useCartStore();
 const order = ref({
@@ -62,7 +62,10 @@ const placeOrder=()=>{
 watch(()=>cartStore.loading,(newLoading)=>{
   disable.value = newLoading;
 })
-onMounted(initFlowbite);
+onMounted(()=>{
+  disable.value=cartStore.loading;
+  initFlowbite();
+});
 </script>
 
 <template>

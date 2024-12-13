@@ -62,6 +62,8 @@ const placeOrder=async (userInfo: { name: string, surname: string, email: string
       products: product,
     }
     if (await cartStore.placeOrder(order)) {
+      cartStore.products=[];
+      cartStore.promotions=[];
       await route.push('/');
     }else {
       console.log("Une erreur s'est produite")

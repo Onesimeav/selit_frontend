@@ -9,6 +9,7 @@ export const useOrderStore = defineStore('orderStore',{
   state() {
       return {
         ordersId: null as number[]|null,
+        ongoingOrder: null as number[]|null,
         loading: true,
         error: null as string|null,
       }

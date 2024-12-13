@@ -56,7 +56,38 @@ export const useProductStore = defineStore('product',{
       }else{
         return apiResponse.data.product
       }
+    },
+
+    async searchProduct(keyword:string,categoryId?:number):Promise<Page<Product>>{
+      this.loading=true;
+      const shopStore = useShopStore();
+      if (shopStore.shop){
+        let query;
+        if(categoryId){
+          query = {
+            'keyword':keyword,
+            'category_id':categoryId,
+            'shop_id':shopStore.shop.id,
+          }
+        }else {
+          query = {
+            'keyword':keyword,
+            'shop_id':shopStore.shop.id,
+          }
+        }
+        const apiResponse= await axios.get('products/search-product', {params:query});
+
+        if(apiResponse.status>=400){
+          return Promise.reject();
+        }
+        return apiResponse.data.result
+      }
+      this.loading=false
+      this.error='Une erreur est survenue lors du chargement de la boutique';
+      return  Promise.reject();
+
     }
+
 
   }
 })
