@@ -10,6 +10,7 @@ export default {
       fontFamily: {
         sora: ['Sora', 'sans-serif'],
         rubik: ['Rubik', 'sans-serif'],
+        poppins:['poppins', 'sans-serif'],
       },
       fontSize: {
         'normal-text':'14px',
@@ -30,7 +31,9 @@ export default {
       },
       colors: {
         appBlack: '#2A2A2A',
-        appGray:'#C7CACF'
+        appGray:'#C7CACF',
+        appBlue:'#0066FFFF',
+        appYellow:'#FBBC05FF'
       },
       maxWidth: {
         '5/12': '41.666667%',

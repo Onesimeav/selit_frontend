@@ -6,31 +6,55 @@ import { useProductStore } from '@/stores/shop/products'
 import { useCategoryStore } from '@/stores/shop/categories'
 import { useCartStore } from '@/stores/shop/carts'
 import { useOrderStore } from '@/stores/shop/orders'
+import { useUserStore } from '@/stores/dashboard/user'
+import { initFlowbite } from 'flowbite'
 
 const router = useRouter();
 const host = window.location.host;
 const subdomain = host.split('.');
-if (subdomain[0]==='www'){
-  if (subdomain[1]===import.meta.env.VITE_DOMAIN_NAME){}else{}
-}else if(subdomain[0]===import.meta.env.VITE_DOMAIN_NAME){}else {
+
+const getCurrentUser = async () => {
+  const userStore = useUserStore();
+  if (!await userStore.getCurrentUser()) {
+    await router.replace({ path: '/login' });
+  }
+};
+
+const startShop = async (shopName:string) => {
   const shopStore = useShopStore();
-  onMounted(async ()=>{
-    const shopAcess= await shopStore.getShop(subdomain[0]);
-    if (!shopAcess){
-      await router.replace({ path: '/404' })
-    }else{
-      const productStore = useProductStore();
-      const categoryStore = useCategoryStore();
-      const cartStore = useCartStore();
-      const orderStore = useOrderStore();
-      await productStore.getProducts();
-      await categoryStore.getCategory();
-      cartStore.getCart();
-      await cartStore.getCartPromotions();
-      orderStore.getLocalOrders();
-    }
-  })
-}
+  const shopAccess = await shopStore.getShop(shopName);
+  if (!shopAccess) {
+    await router.replace({ path: '/404' });
+  } else {
+    const productStore = useProductStore();
+    const categoryStore = useCategoryStore();
+    const cartStore = useCartStore();
+    const orderStore = useOrderStore();
+
+    await productStore.getProducts();
+    await categoryStore.getCategory();
+    cartStore.getCart();
+    await cartStore.getCartPromotions();
+    orderStore.getLocalOrders();
+  }
+};
+
+const initApp = () => {
+  const domain = subdomain[0] === 'www' ? subdomain[1] : subdomain[0];
+  const mainDomain = import.meta.env.VITE_DOMAIN_NAME;
+
+  if (domain === mainDomain) {
+    getCurrentUser();
+  } else {
+    startShop(domain);
+  }
+};
+
+onMounted(() => {
+  initFlowbite();
+  initApp();
+});
+
 </script>
 
 <template>
