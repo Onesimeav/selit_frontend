@@ -33,7 +33,8 @@ export default {
         appBlack: '#2A2A2A',
         appGray:'#C7CACF',
         appBlue:'#0066FFFF',
-        appYellow:'#FBBC05FF'
+        appYellow:'#FBBC05FF',
+        appDarkWhite:'#F5F7FAFF'
       },
       maxWidth: {
         '5/12': '41.666667%',
@@ -42,7 +43,11 @@ export default {
   },
   plugins: [
     // eslint-disable-next-line @typescript-eslint/no-require-imports
-    require('flowbite/plugin')
+    require('flowbite/plugin')({
+      wysiwyg: true,
+    }),
+    // eslint-disable-next-line @typescript-eslint/no-require-imports
+    require('flowbite-typography'),
   ],
 }
 

@@ -11,7 +11,8 @@ import NavbarComponent from '@/components/dashboard/NavbarComponent.vue'
       await new Promise(resolve => setTimeout(resolve,100));
     }
     if (userStore.currentUser){
-      if (userStore.currentUser.email_verified_at==null){
+      if (userStore.currentUser.email_verified_at){}
+      else {
         await router.push('/verify-user');
       }
     }
@@ -26,6 +27,7 @@ onMounted( ()=>{
 
 <template>
   <navbar-component/>
+  <router-view/>
 </template>
 
 <style scoped>

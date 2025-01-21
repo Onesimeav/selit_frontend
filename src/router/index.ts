@@ -1,5 +1,6 @@
 import { createRouter, createWebHistory } from 'vue-router'
 import DashboardHomeView from '@/views/dashboard/DashboardHomeView.vue'
+import DashboardStatsView from '@/views/dashboard/DashboardStatsView.vue'
 
 const dashboardRouter = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
@@ -7,7 +8,61 @@ const dashboardRouter = createRouter({
     {
       path: '/',
       name: 'home',
-      component: DashboardHomeView
+      component: DashboardHomeView,
+      children:[
+        {
+          path:'/',
+          name:'dashboard-stats',
+          component:DashboardStatsView,
+        },
+        {
+          path:'shop',
+          name:'shop',
+          component:()=>import('../views/dashboard/ShopView.vue')
+        },
+        {
+          path:'order',
+          name:'order',
+          component:()=>import('../views/dashboard/OrderView.vue')
+        },
+        {
+          path:'product',
+          name:'product',
+          component:()=>import('../views/dashboard/ProductView.vue'),
+          children:[
+            {
+              path:'',
+              name:'product-list',
+              component:()=>import('../components/dashboard/ProductComponent.vue')
+            },
+            {
+              path:'create',
+              name:'create-product',
+              component:()=>import('../components/dashboard/CreateProductComponent.vue')
+            },
+            {
+              path:'update/:id',
+              name:'update-product',
+              component:()=>import('../components/dashboard/UpdateProductComponent.vue')
+            }
+          ]
+        },
+        {
+          path:'promotion',
+          name:'promotion',
+          component: () => import('../views/dashboard/PromotionView.vue')
+        },
+        {
+          path:'category',
+          name:'category',
+          component: ()=>import('../views/dashboard/CategoryView.vue')
+        },
+        {
+          path:'setting',
+          name:'setting',
+          component:()=>import('../views/dashboard/SettingView.vue')
+        }
+      ]
     },
     {
       path:'/login',

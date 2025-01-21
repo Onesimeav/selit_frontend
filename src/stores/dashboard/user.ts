@@ -146,6 +146,20 @@ export const useUserStore = defineStore('user',{
       }
       this.errorMessage="Code incorrect";
       return false;
+    },
+
+    async logoutUser():Promise<boolean>{
+      this.loading=true;
+      const apiResponse = await axios.get('logout');
+      this.loading=false;
+      if (apiResponse.status<400){
+        localStorage.removeItem('token');
+        this.currentUser=null;
+        return true;
+      }else{
+        this.errorMessage="Une erreur s'estt produite lors de la déconnexion";
+        return  false;
+      }
     }
   }
 })
