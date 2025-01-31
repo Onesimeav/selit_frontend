@@ -280,12 +280,6 @@ import type { Specification } from '@/models/specification'
     }
   }
 
-  const testMode = async ()=>{
-    console.log(updatedValueCheck());
-    console.log(productSpecification.value);
-    console.log('Test passed');
-  }
-
   const updateProduct = async ()=>{
     if (updatedValueCheck()){
       if (productSpecification.value && Object.keys(productSpecification.value).length>=1){

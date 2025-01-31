@@ -55,7 +55,29 @@ const dashboardRouter = createRouter({
         {
           path:'category',
           name:'category',
-          component: ()=>import('../views/dashboard/CategoryView.vue')
+          component: ()=>import('../views/dashboard/CategoryView.vue'),
+          children:[
+            {
+              path:'',
+              name:'category-list',
+              component:()=>import('../components/dashboard/CategoryComponent.vue'),
+            },
+            {
+              path:'create',
+              name:'create-category',
+              component:()=>import('../components/dashboard/CreateCategoryComponent.vue'),
+            },
+            {
+              path:'update/:id',
+              name:'update-category',
+              component:()=>import('../components/dashboard/UpdateCategoryComponent.vue'),
+            },
+            {
+              path:':id',
+              name:'category-details',
+              component:()=>import('../components/dashboard/CategoryDetailsComponent.vue'),
+            }
+          ]
         },
         {
           path:'setting',

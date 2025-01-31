@@ -4,14 +4,12 @@ import type { Product } from '@/models/product'
 import axios from 'axios'
 import type { CreateProduct } from '@/requests/create-product'
 import type { Specification } from '@/models/specification'
-import type { UnwrapRef } from 'vue'
 
 export const useDashboardProductStore = defineStore('dashboardProductStore',{
 
   state(){
     return{
       products: null as Page<Product> | null,
-      page : 0,
       loading : false,
       errorMessage : null as string | null,
     }
@@ -41,10 +39,13 @@ export const useDashboardProductStore = defineStore('dashboardProductStore',{
           if (!this.products){
             this.products = apiResponse.data.result
           }else{
-            this.products = {
-              ...this.products,
-              ...apiResponse.data.result,
-            }
+           const formatedResponse:Page<Product> = apiResponse.data.result;
+           this.products.total=formatedResponse.total;
+           this.products.per_page=formatedResponse.per_page;
+           this.products.data = [
+             ...this.products.data,
+             ...formatedResponse.data
+           ]
           }
         }else{
           this.products = apiResponse.data.result;

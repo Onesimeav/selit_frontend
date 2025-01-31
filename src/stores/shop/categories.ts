@@ -5,6 +5,9 @@ import { useShopStore } from '@/stores/shop/shops'
 import axios from 'axios'
 import type { Product } from '@/models/product'
 
+/*
+* TODO: Fix load more
+* */
 export const useCategoryStore= defineStore('category',{
   state() {
       return {
