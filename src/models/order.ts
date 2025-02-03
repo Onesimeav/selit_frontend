@@ -10,7 +10,7 @@ export interface Order {
   location_longitude:number;
   status:          string;
   shop_id:         number;
-  orderProducts:   OrderProduct[];
+  orderProducts?:   OrderProduct[];
 }
 
 export interface OrderProduct {

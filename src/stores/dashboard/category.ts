@@ -82,7 +82,12 @@ export const useDashboardCategoryStore = defineStore('dashboardCategory',{
       }
       const apiResponse = await axios.get('category',{params:query});
       this.loading=false;
-      return apiResponse.data.result;
+      if (apiResponse.status<400){
+        return apiResponse.data.result;
+      }else{
+        return Promise.reject();
+      }
+
     },
 
     async getCategoryProducts (category_id:number, page?:number):Promise<Page<Product>>{
@@ -90,7 +95,12 @@ export const useDashboardCategoryStore = defineStore('dashboardCategory',{
       const url = page ? `category/get-products/${category_id}/?page=${page}`:`category/get-products/${category_id}`;
       const apiResponse = await axios.get(url);
       this.loading=false;
-      return apiResponse.data.products;
+      if (apiResponse.status<400){
+        return apiResponse.data.products;
+      }else{
+        return Promise.reject();
+      }
+
     },
 
     async addProductToCategory (categoryId:number,products:number[]):Promise<boolean>{

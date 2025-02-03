@@ -33,7 +33,8 @@
 
   const removeProducts = ()=>{
     if (selectedProducts.value && selectedProducts.value.length>0){
-      emit('remove-products',selectedProducts.value)
+      emit('remove-products',selectedProducts.value);
+      selectedProducts.value=[];
     }
   }
 
@@ -46,7 +47,7 @@
 
 <template>
   <div class="relative overflow-x-auto shadow-md sm:rounded-lg m-4">
-    <div v-if="selectedProducts.length!=0" class="relative justify-items-end end-6 ">
+    <div v-if="selectedProducts.length>0" class="relative justify-items-end end-6 ">
       <button type="button" @click="removeProducts" class=" flex justify-around items-center border-none bg-red-700 rounded-lg px-4 py-2 text-white font-poppins font-bold text-normal-text m-2">
         Supprimer
         <span class="inline-flex items-center justify-center w-4 h-4 ms-2 text-xs font-semibold text-red-800 bg-red-300 rounded-full">

@@ -11,7 +11,7 @@ const dashboardRouter = createRouter({
       component: DashboardHomeView,
       children:[
         {
-          path:'/',
+          path:'',
           name:'dashboard-stats',
           component:DashboardStatsView,
         },
@@ -23,7 +23,19 @@ const dashboardRouter = createRouter({
         {
           path:'order',
           name:'order',
-          component:()=>import('../views/dashboard/OrderView.vue')
+          component:()=>import('../views/dashboard/OrderView.vue'),
+          children:[
+            {
+              path:'',
+              name:'order-list',
+              component:()=>import('../components/dashboard/OrderComponent.vue')
+            },
+            {
+              path:':id',
+              name:'order-details',
+              component:()=>import('../components/dashboard/OrderDetailsComponent.vue')
+            }
+          ]
         },
         {
           path:'product',
@@ -50,7 +62,29 @@ const dashboardRouter = createRouter({
         {
           path:'promotion',
           name:'promotion',
-          component: () => import('../views/dashboard/PromotionView.vue')
+          component: () => import('../views/dashboard/PromotionView.vue'),
+          children : [
+            {
+              path:'',
+              name:'promotion-list',
+              component:()=>import('../components/dashboard/PromotionComponent.vue')
+            },
+            {
+              path:'create',
+              name : 'create-promotion',
+              component:()=>import('../components/dashboard/CreatePromotionComponent.vue')
+            },
+            {
+              path:'update/:id',
+              name:'update-promotion',
+              component:()=>import('../components/dashboard/UpdatePromotionComponent.vue')
+            },
+            {
+              path: ':id',
+              name:'promotion-details',
+              component:()=>import('../components/dashboard/PromotionDetailsComponent.vue')
+            }
+          ]
         },
         {
           path:'category',

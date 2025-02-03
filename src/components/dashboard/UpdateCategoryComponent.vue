@@ -82,6 +82,12 @@
     await productStore.getProducts(searchWord.value,categoryShop.value,shopProductsPage.value>1?shopProductsPage.value:undefined)
     if(productStore.products){
       shopProducts.value=productStore.products
+      if (category.value && category.value.products && shopProducts.value && shopProducts.value.data){
+        for (let i = 0; i < category.value.products.data.length; i++) {
+         shopProducts.value.data=shopProducts.value.data.filter(product=>product.id!==category.value?.products?.data[i].id)
+        }
+        shopProducts.value.total -= category.value.products.total;
+      }
     }
   }
 
@@ -134,7 +140,15 @@
   })
 
   watch(()=>productStore.products,(newProducts)=>{
-    if(newProducts && newProducts!=shopProducts.value) shopProducts.value = newProducts
+    if(newProducts && newProducts!=shopProducts.value){
+      shopProducts.value = newProducts
+      if (category.value && category.value.products && shopProducts.value && shopProducts.value.data){
+        for (let i = 0; i < category.value.products.data.length; i++) {
+          shopProducts.value.data=shopProducts.value.data.filter(product=>product.id!==category.value?.products?.data[i].id)
+        }
+        shopProducts.value.total -= category.value.products.total;
+      }
+    }
   })
 
 </script>

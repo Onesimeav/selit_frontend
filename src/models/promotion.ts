@@ -6,4 +6,5 @@ export interface Promotion {
   autoApply:  boolean;
   duration:   number;
   active:     boolean;
+  shop_id:    number;
 }

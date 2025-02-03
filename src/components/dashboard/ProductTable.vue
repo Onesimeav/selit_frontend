@@ -6,12 +6,14 @@ import { initFlowbite, Modal, type ModalInterface } from 'flowbite'
 import { useDashboardProductStore } from '@/stores/dashboard/product'
 import { useRouter } from 'vue-router'
 import { useDashboardCategoryStore } from '@/stores/dashboard/category'
+import { useDashboardPromotionStore } from '@/stores/dashboard/promotion'
 
-  const props = defineProps<{
+const props = defineProps<{
     products: Page<Product>,
     categoryPage?:false|boolean;
     categoryDetailPage?:false|boolean;
     categoryId?:number;
+    promotionDetailPage?:false|boolean
   }>();
   const emit = defineEmits<{
     (event:'load-more'):void;
@@ -26,6 +28,7 @@ import { useDashboardCategoryStore } from '@/stores/dashboard/category'
   const productList = ref<Product[]>([]);
   const categoryStore = useDashboardCategoryStore();
   const deleteProductModal = ref<ModalInterface>();
+  const promotionStore = useDashboardPromotionStore();
 
   const allProductCheckbox = ()=>{
    if(props.products.data.length===selectedProducts.value.length){
@@ -81,6 +84,22 @@ import { useDashboardCategoryStore } from '@/stores/dashboard/category'
   const removeProduct = async ()=>{
     if (props.categoryDetailPage && props.categoryId){
       if (await categoryStore.removeProductFromCategory(props.categoryId,selectedProducts.value)){
+        console.log("Opération réussi");
+        emit('product-removed');
+        if (deleteProductModal.value){
+          deleteProductModal.value.hide();
+        }else{
+          console.log("Une erreur est survenue, veuillez recharger la page")
+        }
+      }else{
+        console.log("Echec de l'opération");
+      }
+    }
+  }
+
+  const removeProductFromPromotion = async ()=>{
+    if (props.promotionDetailPage && props.categoryId){
+      if (await promotionStore.removeProductFromPromotion(props.categoryId,selectedProducts.value)){
         console.log("Opération réussi");
         emit('product-removed');
         if (deleteProductModal.value){
@@ -180,7 +199,7 @@ import { useDashboardCategoryStore } from '@/stores/dashboard/category'
           {{product.price}}
         </td>
         <td class="px-6 py-8 flex justify-around">
-          <div v-if="!categoryPage && !categoryDetailPage && deleteProductModal">
+          <div v-if="!categoryPage && !categoryDetailPage && !promotionDetailPage && deleteProductModal">
             <button type="button" @click="redirectToUpdatePage(product.id)" >
               <svg class="w-6 h-6 text-appBlue dark:text-white" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="currentColor" viewBox="0 0 24 24">
                 <path fill-rule="evenodd" d="M11.32 6.176H5c-1.105 0-2 .949-2 2.118v10.588C3 20.052 3.895 21 5 21h11c1.105 0 2-.948 2-2.118v-7.75l-3.914 4.144A2.46 2.46 0 0 1 12.81 16l-2.681.568c-1.75.37-3.292-1.263-2.942-3.115l.536-2.839c.097-.512.335-.983.684-1.352l2.914-3.086Z" clip-rule="evenodd"/>
@@ -194,10 +213,10 @@ import { useDashboardCategoryStore } from '@/stores/dashboard/category'
             </button>
           </div>
           <div v-if="categoryPage">
-            <button @click="productCheckbox(product.id)" class="font-medium text-appBlue dark:text-red-500 hover:underline ms-3">Ajouter</button>
+            <button type="button" @click="productCheckbox(product.id)" class="font-medium text-appBlue dark:text-red-500 hover:underline ms-3">Ajouter</button>
           </div>
-          <div v-if="categoryDetailPage && deleteProductModal">
-            <button @click="selectedProducts=[product.id]; deleteProductModal.show()"  class="font-medium text-red-600 dark:text-red-500 hover:underline ms-3">Retirer</button>
+          <div v-if="(categoryDetailPage || promotionDetailPage) &&  deleteProductModal">
+            <button type="button" @click="selectedProducts=[product.id]; deleteProductModal.show()"  class="font-medium text-red-600 dark:text-red-500 hover:underline ms-3">Retirer</button>
           </div>
         </td>
       </tr>
@@ -219,7 +238,13 @@ import { useDashboardCategoryStore } from '@/stores/dashboard/category'
           </svg>
           <h3 class="mb-5 text-lg font-normal text-gray-500 dark:text-gray-400">Voulez vous vraiment supprimer
             {{selectedProducts.length <= 1 ? `ce produit` : `ces produits (${selectedProducts.length})`}} ?</h3>
-          <button @click="categoryDetailPage?removeProduct():deleteProducts()" type="button" class="text-white bg-red-600 hover:bg-red-800 focus:ring-4 focus:outline-none focus:ring-red-300 dark:focus:ring-red-800 font-medium rounded-lg text-sm inline-flex items-center px-5 py-2.5 text-center">
+          <button v-if="categoryDetailPage" @click="removeProduct()" type="button" class="text-white bg-red-600 hover:bg-red-800 focus:ring-4 focus:outline-none focus:ring-red-300 dark:focus:ring-red-800 font-medium rounded-lg text-sm inline-flex items-center px-5 py-2.5 text-center">
+            Supprimer
+          </button>
+          <button v-if="promotionDetailPage " @click="removeProductFromPromotion()" type="button" class="text-white bg-red-600 hover:bg-red-800 focus:ring-4 focus:outline-none focus:ring-red-300 dark:focus:ring-red-800 font-medium rounded-lg text-sm inline-flex items-center px-5 py-2.5 text-center">
+            Supprimer
+          </button>
+          <button v-if="!categoryDetailPage && !promotionDetailPage" @click="deleteProducts()" type="button" class="text-white bg-red-600 hover:bg-red-800 focus:ring-4 focus:outline-none focus:ring-red-300 dark:focus:ring-red-800 font-medium rounded-lg text-sm inline-flex items-center px-5 py-2.5 text-center">
             Supprimer
           </button>
           <button @click="deleteProductModal.hide()" type="button" class="py-2.5 px-5 ms-3 text-sm font-medium text-gray-900 focus:outline-none bg-white rounded-lg border border-gray-200 hover:bg-gray-100 hover:text-blue-700 focus:z-10 focus:ring-4 focus:ring-gray-100 dark:focus:ring-gray-700 dark:bg-gray-800 dark:text-gray-400 dark:border-gray-600 dark:hover:text-white dark:hover:bg-gray-700">Annuler</button>
