@@ -77,15 +77,16 @@
 
   }
 
-  const pusher = new Pusher(import.meta.env.VITE_PUSHER_KEY,{cluster:import.meta.env.VITE_PUSHER_CLUSTER});
-  const channel = pusher.subscribe(`order-status-${props.orderId}`);
-  channel.bind('order-status-change',function(data:{orderId:number,orderStatus:string}){
-    orderStatus.value=data.orderStatus;
-    setOrderStep();
-  })
 
-  onMounted(()=>{
-    getOrderDetails();
+
+  onMounted(async ()=>{
+    await getOrderDetails();
+    const pusher = new Pusher(import.meta.env.VITE_PUSHER_KEY,{cluster:import.meta.env.VITE_PUSHER_CLUSTER});
+    const channel = pusher.subscribe(`order-status-${props.orderId}`);
+    channel.bind('order-status-change',function(data:{orderId:number,orderStatus:string}){
+      orderStatus.value=data.orderStatus;
+      setOrderStep();
+    })
   })
 </script>
 
@@ -104,7 +105,7 @@
     <p v-if="step===3" class="font-rubik font-semibold text-heading-2 mx-4">Livraison en cours</p>
     <p v-if="step===4" class="font-rubik font-semibold text-heading-2 mx-4">Commande livrée</p>
     <p v-if="step===5" class="font-rubik font-semibold text-heading-2 mx-4">Terminer</p>
-    <p v-if="step===6" class="font-rubik font-semibold text-heading-2 mx-4">Commande annuluée</p>
+    <p v-if="step===6" class="font-rubik font-semibold text-heading-2 mx-4">Commande annulée</p>
 
     <div class="grid grid-cols-5 mx-1.5 mt-5  mb-3 items-center">
       <div class="col-span-1 w-full border-none h-2 rounded-lg bg-green-800" :class="step===6?'bg-red-800':''"></div>

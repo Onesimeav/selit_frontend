@@ -2,6 +2,7 @@ import { defineStore } from 'pinia'
 import type { Order } from '@/models/order'
 import axios from 'axios'
 import type { Page } from '@/models/page'
+import type { DeliveryMan } from '@/models/deliveryMan'
 
 export const useDashboardOrderStore = defineStore('dashboard-order',{
   state() {
@@ -48,7 +49,7 @@ export const useDashboardOrderStore = defineStore('dashboard-order',{
 
     },
 
-    async getOrder(orderId:number):Promise<Order>{
+    async getOrder(orderId:number):Promise<Order[]>{
       this.loading = true;
       const query = {
         ordersIds:[orderId]
@@ -101,7 +102,21 @@ export const useDashboardOrderStore = defineStore('dashboard-order',{
       const apiResponse = await axios.get(`orders/get-invoice/${orderReference}`);
       this.loading=false;
       return  apiResponse.status<400;
-    }
+    },
 
+    async getDeliveryMan(orderReference:string,shopId:number):Promise<DeliveryMan>{
+      this.loading=true;
+      const query = {
+        order_reference:orderReference,
+        shop_id:shopId,
+      }
+      const apiResponse = await axios.get('orders/get-deliveryman-info',{params:query});
+      this.loading=false;
+      if (apiResponse.status<400){
+        return apiResponse.data
+      }else{
+        return Promise.reject()
+      }
+    }
   }
 })
