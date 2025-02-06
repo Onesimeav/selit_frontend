@@ -119,7 +119,7 @@ const props = defineProps<{
     }
   }
   const getProductTotal = () =>{
-    if (props.products.per_page <= props.products.total){
+    if (props.products.per_page <props.products.total){
       showLoadMore.value=false
     }else {
       showLoadMore.value = false

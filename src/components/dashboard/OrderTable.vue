@@ -9,6 +9,9 @@ import { useRouter } from 'vue-router'
 
 const props = defineProps<{
   orders:Page<Order>
+}>();
+const emit = defineEmits<{
+  (event:'load-more'):void
 }>()
 const router = useRouter();
 
@@ -76,6 +79,11 @@ onMounted(()=>{
       </tr>
       </tbody>
     </table>
+    <div class="grid grid-cols-8 m-6">
+      <div class="col-span-4"></div>
+      <button v-if="orders.per_page<orders.total" @click="emit('load-more')" class=" col-span-2 border-2 rounded-full w-1/2 px-4 border-appGray font-poppins font-semibold text-heading-3 text-appBlue hover:text-white hover:bg-appBlue hover:border-appBlue">Voir plus</button>
+      <p class="col-span-2 font-poppins font-semibold text-heading-3 ">Total: <span class="font-normal">{{orders.total}}</span></p>
+    </div>
   </div>
 </template>
 

@@ -86,7 +86,7 @@ watch(()=>orderStore.orders, (newOrders)=>{
         <order-status-filter @change-status="status => filterOrdersByStatus(status)" @reset-status="filterOrdersByStatus()"/>
       </div>
     </div>
-    <order-table v-if="orders && orders.data.length>0" :orders="orders"/>
+    <order-table v-if="orders && orders.data.length>0" :orders="orders" @load-more="loadMore()"/>
     <div v-else class=" w-full justify-center items-center">
       <p class="font-poppins font-normal text-normal-text text-appGray">Aucune commande disponible</p>
     </div>
