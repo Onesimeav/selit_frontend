@@ -18,7 +18,24 @@ const dashboardRouter = createRouter({
         {
           path:'shop',
           name:'shop',
-          component:()=>import('../views/dashboard/ShopView.vue')
+          component:()=>import('../views/dashboard/ShopView.vue'),
+          children:[
+            {
+              path:'',
+              name:'shop-list',
+              component:()=>import('../components/dashboard/ShopComponent.vue'),
+            },
+            {
+              path:':subdomain',
+              name:'shop-details',
+              component:()=>import('../components/dashboard/ShopDetailsComponent.vue')
+            },
+            {
+              path:'create',
+              name:'create-shop',
+              component:()=>import('../components/dashboard/CreateShopComponent.vue')
+            }
+          ]
         },
         {
           path:'order',
