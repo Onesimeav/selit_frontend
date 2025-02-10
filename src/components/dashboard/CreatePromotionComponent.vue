@@ -172,7 +172,7 @@ watch(()=>productStore.products,(newProducts)=>{
         <div class="col-span-2 mx-4">
           <label for="countries" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Boutique</label>
           <select v-if="userShops.length==1" id="countries" v-model="promotionDetails.shop" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500">
-            <option selected>{{userShops[0].name}}</option>
+            <option selected :value="userShops[0].id">{{userShops[0].name}}</option>
           </select>
           <select v-if="userShops.length>1" id="countries" v-model="promotionDetails.shop" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500">
             <option selected :value="userShops[0].id">{{userShops[0].name}}</option>
@@ -197,14 +197,14 @@ watch(()=>productStore.products,(newProducts)=>{
         </div>
       </div>
       <div class="flex items-center mb-5 mx-4">
-        <label for="auto-apply" class="block mr-2 text-sm font-medium text-gray-900 dark:text-white">Activer la pormotion après la création ?</label>
+        <label for="auto-apply" class="block mr-2 text-sm font-medium text-gray-900 dark:text-white">Activer la promotion après la création ?</label>
         <select id="auto-apply" v-model="promotionDetails.autoApply" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-1/5 p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500">
           <option selected :value="false">Non</option>
           <option :value="true">Oui</option>
         </select>
       </div>
       <div class="flex items-center mb-5 mx-4">
-        <label for="active" class="block mr-2 text-sm font-medium text-gray-900 dark:text-white">Appliquer automtiquement au produits (Si non, un code de promotion sera générée après la promotion) ?</label>
+        <label for="active" class="block mr-2 text-sm font-medium text-gray-900 dark:text-white">Appliquer automtiquement au produits (Si non, un code de promotion sera générée après la création) ?</label>
         <select id="active" v-model="promotionDetails.active" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-1/5 p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500">
           <option selected :value="false">Non</option>
           <option :value="true">Oui</option>

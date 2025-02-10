@@ -58,7 +58,7 @@
      }
      if (await shopStore.createShop(query)){
        console.log("Opération réussie");
-       await router.push('shop-list');
+       await router.push({name:'shop-list'});
      }else{
        console.log("Echec de l'opération");
      }
