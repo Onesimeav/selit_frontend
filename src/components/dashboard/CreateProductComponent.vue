@@ -255,7 +255,7 @@ onMounted(initFlowbite)
             <input id="medias" type="file" class="hidden" accept="image/*,video/*" multiple @change="handleMediaChange" />
           </label>
         </div>
-        <div v-if="startCarousel" id="default-carousel" class="relative overflow-hidden w-full lg:w-4/5 h-20 lg:h-60" data-carousel="slide">
+        <div v-if="startCarousel" id="default-carousel" class="relative overflow-hidden w-full lg:w-4/5 h-20 lg:h-60 mb-5" data-carousel="slide">
           <!-- Carousel wrapper -->
           <div id="carousel-wrapper" class="relative rounded-lg">
             <!-- Carousel items will be dynamically added here -->

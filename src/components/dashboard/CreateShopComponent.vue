@@ -37,13 +37,13 @@
     if (logo){
       const file = logo.files;
       if (file && file.length>0 && file[0].type.split('/')[0]==='image'){
-        shopDetails.value.banner=file[0];
+        shopDetails.value.logo=file[0];
       }
     }
   }
 
   const verifyCreateShopFormValues = ()=>{
-    return shopDetails.value.name!="" && shopDetails.value.description!=="" && shopDetails.value.subdomain!=="" && shopDetails.value.banner!==null && shopDetails.value.logo!==null;
+    return shopDetails.value.name!=="" && shopDetails.value.description!=="" && shopDetails.value.subdomain!=="" && shopDetails.value.banner!==null && shopDetails.value.logo!==null;
   }
 
   const createShop =async ()=>{
@@ -108,7 +108,7 @@
         <input @change="addLogo()" class="block w-full lg:w-2/3 text-sm text-gray-900 border border-gray-300 rounded-lg cursor-pointer bg-gray-50 dark:text-gray-400 focus:outline-none dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400" id="logo" type="file" required>
       </div>
 
-      <button type="submit" :disabled="!verifyCreateShopFormValues"  :class="verifyCreateShopFormValues()?'bg-appBlue':'bg-blue-400'" class=" self-center w-1/5 border-none font-poppins font-medium text-heading-3 text-white rounded-lg px-2 py-2 m-8 hover:border-none ">Créer la catégorie</button>
+      <button type="submit" :disabled="!verifyCreateShopFormValues()"  :class="verifyCreateShopFormValues()?'bg-appBlue':'bg-blue-400'" class=" self-center w-1/5 border-none font-poppins font-medium text-heading-3 text-white rounded-lg px-2 py-2 m-8 hover:border-none ">Créer la catégorie</button>
     </form>
     </div>
 </template>
