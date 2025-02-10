@@ -50,6 +50,16 @@ export const useDashboardShopStore = defineStore('dashboardShop',{
       return apiResponse.status<400
     },
 
+    async addProducts(shopId:number,products:number[]):Promise<boolean>{
+      this.loading=true;
+      const query = {
+        shop_id:shopId,
+        products:products
+      }
+      const apiResponse = await axios.post('shops/add-product-to-shop',query);
+      return apiResponse.status<400;
+    },
+
     async publishShop(shopId:number):Promise<boolean>{
       this.loading=true;
       const apiResponse= await axios.get(`shops/publish-shop/${shopId}`);

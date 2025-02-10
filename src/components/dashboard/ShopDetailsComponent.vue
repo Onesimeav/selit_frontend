@@ -1,13 +1,16 @@
 <script setup lang="ts">
 import PreviousPageButton from '@/components/shop/PreviousPageButton.vue'
 import { useRoute } from 'vue-router'
-import { onMounted, ref } from 'vue'
+import { nextTick, onMounted, ref } from 'vue'
 import type { Page } from '@/models/page'
 import type { Product } from '@/models/product'
-import { initFlowbite } from 'flowbite'
+import { initFlowbite, Modal, type ModalInterface } from 'flowbite'
 import { useDashboardShopStore } from '@/stores/dashboard/shop'
 import type { Shop } from '@/models/shop'
 import { useDashboardProductStore } from '@/stores/dashboard/product'
+import ShopProductTable from '@/components/dashboard/ShopProductTable.vue'
+import SearchBarComponent from '@/components/dashboard/SearchBarComponent.vue'
+import ProductTable from '@/components/dashboard/ProductTable.vue'
 
 const shopStore = useDashboardShopStore();
 const productStore = useDashboardProductStore();
@@ -16,6 +19,13 @@ const route = useRoute();
 const shop = ref<Shop>();
 const products = ref<Page<Product>>()
 const page = ref<number>(1);
+const addProductModal = ref<ModalInterface>();
+const shopProductsPage = ref<number>(1);
+const selectedProducts = ref<Product[]>([]);
+const searchWord = ref<string>();
+const userProducts = ref<Page<Product>>();
+const descriptionModal = ref<ModalInterface>()
+
 
 const getShopDetails = async()=>{
   shop.value= await shopStore.getShop(String(route.params.subdomain));
@@ -24,10 +34,13 @@ const getShopDetails = async()=>{
 
 const getShopProducts = async ()=>{
   if(shop.value){
-    await productStore.getProducts(undefined,shop.value.id,page.value)
-    if (productStore.products){
-      products.value=productStore.products
-    }
+    productStore.products=null;
+    await productStore.getProducts(undefined,shop.value.id,page.value==1?page.value:undefined)
+    await nextTick(() => {
+      if (productStore.products) {
+        products.value = productStore.products
+      }
+    })
   }else{
     console.log("Une erreur est survenue");
   }
@@ -51,10 +64,79 @@ const changeShopStatus= async ()=>{
 
 }
 
+const loadMoreUserProducts = async ()=>{
+  shopProductsPage.value +=1;
+  await getUserProducts();
+}
+
+const removeProductFromShop = (products:number[])=>{
+  for (let i = 0; i < products.length; i++) {
+    selectedProducts.value=selectedProducts.value.filter(product=>products[i]!=product.id)
+  }
+}
+
+const searchProduct = async (term:string)=>{
+  searchWord.value=term;
+  await getUserProducts();
+}
+
+const resetFilter = async ()=>{
+  searchWord.value=undefined;
+  await getUserProducts();
+}
+
+const getUserProducts = async ()=>{
+  await productStore.getProducts(searchWord.value,undefined,shopProductsPage.value>1?shopProductsPage.value:undefined)
+  if(productStore.products){
+      userProducts.value=productStore.products
+      if (products.value && userProducts.value && userProducts.value.data){
+        for (let i = 0; i < products.value.data.length; i++) {
+         userProducts.value.data=userProducts.value.data.filter(product=>product.id!==products.value?.data[i].id)
+        }
+        userProducts.value.total -= products.value.total;
+      }
+    }
+
+}
+
+const addProducts = async ()=>{
+  if (shop.value &&selectedProducts.value && selectedProducts.value.length>0){
+    const productList:number[]=[];
+    selectedProducts.value.forEach(product=>{
+      productList.push(product.id);
+    })
+    if (await shopStore.addProducts(shop.value.id,productList)){
+      selectedProducts.value = [];
+      await getShopProducts();
+      console.log('Opération réussie');
+    }else{
+      console.log("Echec de l'opération");
+    }
+  }
+}
+
+const createModal = ()=>{
+  const modal = document.getElementById('add-product-modal');
+  const description = document.getElementById('default-modal')
+  if(modal && description){
+    descriptionModal.value = new Modal(description);
+    addProductModal.value= new Modal(modal,
+      {
+        onShow:async () => {
+          await getUserProducts()
+        }
+      }
+    );
+  }else{
+    console.log("Une erreur s'est produite, veuillez recherger la page");
+  }
+}
+
 
 onMounted(async()=>{
   await getShopDetails();
   initFlowbite();
+  createModal();
 });
 
 </script>
@@ -84,8 +166,8 @@ onMounted(async()=>{
               <h1 class="font-sora font-extra-bold text-4xl text-white ">{{shop.name}}</h1>
             </div>
             <!-- Modal toggle -->
-            <div class="col-span-1 flex flex-col items-start justify-start h-full">
-              <button data-modal-target="default-modal" data-modal-toggle="default-modal" class="text-white bg-white/60 hover:bg-white/80 focus:outline-none font-medium rounded-full p-2.5 text-center dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800" type="button">
+            <div v-if="descriptionModal" class="col-span-1 flex flex-col items-start justify-start h-full">
+              <button @click="descriptionModal.show()" class="text-white bg-white/60 hover:bg-white/80 focus:outline-none font-medium rounded-full p-2.5 text-center dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800" type="button">
                 <svg class="w-6 h-6 text-black dark:text-white" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" viewBox="0 0 24 24">
                   <path stroke="currentColor" stroke-linecap="round" stroke-width="5" d="M6 12h.01m6 0h.01m5.99 0h.01"/>
                 </svg>
@@ -97,15 +179,20 @@ onMounted(async()=>{
 
       <div class="flex items-center mb-3">
         <p class="justify-center font-poppins font-semibold text-heading-3 mr-6">Produits</p>
-
+        <button v-if="addProductModal" type="button" @click="addProductModal.show(); console.log(userProducts)" class=" flex items-center justify-around text-white bg-appBlue hover:bg-blue-800 font-medium rounded-lg text-sm px-5 py-2.5 me-2 mb-2 dark:bg-blue-600 dark:hover:bg-blue-700 focus:outline-none">
+          <svg class="w-5 h-5 text-white dark:text-white mr-2" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" viewBox="0 0 24 24">
+            <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 12h14m-7 7V5"/>
+          </svg>
+          Ajouter
+        </button>
       </div>
-
+      <shop-product-table v-if="products" :products="products" :products-to-add="selectedProducts" @remove-products="productList => removeProductFromShop(productList)" @add-products="addProducts()" @load-more="loadMore()"/>
     </div>
   </div>
 
   <!-- Main modal -->
   <div id="default-modal" tabindex="-1" aria-hidden="true" class="hidden overflow-y-auto overflow-x-hidden fixed top-0 right-0 left-0 z-50 justify-center items-center w-full md:inset-0 h-[calc(100%-1rem)] max-h-full">
-    <div v-if="shop" class="relative p-4 w-full max-w-2xl max-h-full">
+    <div v-if="shop && descriptionModal" class="relative p-4 w-full max-w-2xl max-h-full">
       <!-- Modal content -->
       <div class="relative bg-white rounded-lg shadow dark:bg-gray-700">
         <!-- Modal header -->
@@ -113,7 +200,7 @@ onMounted(async()=>{
           <h3 class="text-xl font-semibold text-gray-900 dark:text-white">
             Informations
           </h3>
-          <button type="button" class="text-gray-400 bg-transparent hover:bg-gray-200 hover:text-gray-900 rounded-lg text-sm w-8 h-8 ms-auto inline-flex justify-center items-center dark:hover:bg-gray-600 dark:hover:text-white" data-modal-hide="default-modal">
+          <button @click="descriptionModal.hide()" type="button" class="text-gray-400 bg-transparent hover:bg-gray-200 hover:text-gray-900 rounded-lg text-sm w-8 h-8 ms-auto inline-flex justify-center items-center dark:hover:bg-gray-600 dark:hover:text-white" >
             <svg class="w-3 h-3" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 14 14">
               <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m1 1 6 6m0 0 6 6M7 7l6-6M7 7l-6 6"/>
             </svg>
@@ -129,6 +216,48 @@ onMounted(async()=>{
       </div>
     </div>
   </div>
+
+  <!-- Add product modal  -->
+  <div id="add-product-modal" tabindex="-1" class="hidden overflow-y-auto overflow-x-hidden fixed top-0 right-0 left-0 z-50 justify-center items-center w-full md:inset-0 h-[calc(100%-1rem)] max-h-full">
+    <div v-if="addProductModal && userProducts" class="relative p-4 w-full max-w-4xl max-h-full">
+      <!-- Modal content -->
+      <div class="relative bg-white rounded-lg shadow-sm dark:bg-gray-700">
+        <!-- Modal header -->
+        <div class="flex items-center justify-between p-4 md:p-5 border-b rounded-t dark:border-gray-600 border-gray-200">
+          <h3 class="text-xl font-medium text-gray-900 dark:text-white">
+            Ajouter des produits
+          </h3>
+          <button type="button" class="text-gray-400 bg-transparent hover:bg-gray-200 hover:text-gray-900 rounded-lg text-sm w-8 h-8 ms-auto inline-flex justify-center items-center dark:hover:bg-gray-600 dark:hover:text-white" @click="addProductModal.hide()">
+            <svg class="w-3 h-3" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 14 14">
+              <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m1 1 6 6m0 0 6 6M7 7l6-6M7 7l-6 6"/>
+            </svg>
+            <span class="sr-only">Close modal</span>
+          </button>
+        </div>
+        <!-- Modal body -->
+        <div class="p-4 md:p-5 space-y-4">
+          <search-bar-component @search="searchTerm => {searchProduct(searchTerm)}" @reset-search-filter="resetFilter()"/>
+          <div class="font-normal font-poppins text-normal-text px-4">
+            Produits sélectionnées:
+            <span v-if="selectedProducts" class="text-appBlue">
+                {{selectedProducts.length}}
+              </span>
+          </div>
+          <product-table :products="userProducts" :category-page="true" @product-list="list => {selectedProducts=list}" @load-more="loadMoreUserProducts"/>
+        </div>
+        <!-- Modal footer -->
+        <div class="flex items-center justify-center p-4 md:p-5 space-x-3 rtl:space-x-reverse border-t border-gray-200 rounded-b dark:border-gray-600">
+          <button @click="addProductModal.hide()" class="text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-8 py-2.5 text-center dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800">
+            Ajouter
+            <span class="inline-flex items-center justify-center w-4 h-4 ms-2 text-xs font-semibold text-white  bg-blue-400 rounded-full">
+               {{selectedProducts.length}}
+              </span>
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
 
 </template>
 
