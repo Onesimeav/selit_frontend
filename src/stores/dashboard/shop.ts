@@ -40,7 +40,7 @@ export const useDashboardShopStore = defineStore('dashboardShop',{
       query.append('description',shop.description);
       query.append('logo',shop.logo);
       query.append('banner',shop.banner);
-      query.append('productType','Physic');
+      query.append('product_type','Physic');
       query.append('subdomain',shop.subdomain);
 
       const apiResponse = await axios.post('shops',query);
