@@ -162,7 +162,7 @@ watch(()=>productStore.products,(newProducts)=>{
         <div class="col-span-2 mx-4">
           <label for="countries" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Boutique</label>
           <select v-if="userShops.length==1" id="countries" v-model="categoryDetails.shop" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500">
-            <option selected>{{userShops[0].name}}</option>
+            <option selected :value="userShops[0].id">{{userShops[0].name}}</option>
           </select>
           <select v-if="userShops.length>1" id="countries" v-model="categoryDetails.shop" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500">
             <option selected :value="userShops[0].id">{{userShops[0].name}}</option>
