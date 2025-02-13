@@ -61,9 +61,13 @@ watch(() => shopStore.shop, (newShop) => {
       <input type="search" id="default-search"
              :class="{'bg-appGray text-appBlack placeholder-gray-800 focus:ring-appBlack focus:border-appBlack': !blackVersion, 'bg-appBlack text-white placeholder-gray-300 focus:ring-appGray focus:border-appGray': blackVersion}"
              class="border-none block w-full p-4 ps-10 text-md rounded-lg"
-             :placeholder="`Search a product on ${shopName}`"
+             :placeholder="`Chercher un produit sur ${shopName}`"
              required v-model="keyword"/>
-      <button type="submit" class="text-white text-normal-text font-sora font-regular absolute end-2.5 bottom-2.5 bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 rounded-lg text-sm px-4 py-2 dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800">Search</button>
+      <button type="submit" class="text-white text-normal-text font-sora font-regular absolute end-2.5 bottom-2.5 bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 rounded-lg text-sm px-4 py-2 dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800">
+        <svg class="w-4 h-4" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 20 20">
+          <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m19 19-4-4m0-7A7 7 0 1 1 1 8a7 7 0 0 1 14 0Z"/>
+        </svg>
+      </button>
     </div>
   </form>
 </template>
