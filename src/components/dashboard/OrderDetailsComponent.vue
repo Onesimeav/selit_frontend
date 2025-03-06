@@ -179,7 +179,7 @@ onMounted(async () => {
         <button v-if="step===1" type="button" @click="approveOrder()" class="rounded-lg bg-blue-700 px-6 py-3 font-bold font-rubik text-white text-heading-3 hover:bg-blue-600 mx-4">Approuver la commande</button>
         <button v-if="step===2 && deliveryModal" type="button" @click="deliveryModal.show()" class="rounded-lg bg-blue-700 px-6 py-3 font-bold font-rubik text-white text-heading-3 hover:bg-blue-600 mx-4">Envoyer au livreur</button>
         <button v-if="step<5 && cancelOrderModal" type="button" @click="cancelOrderModal.show()" class="rounded-lg bg-red-700 px-6 py-3 font-bold font-rubik text-white text-heading-3 hover:bg-red-600 mx-4">Annuler</button>
-        <button v-if="step===6" @click="getOrderInvoice()" type="button" class="rounded-lg bg-blue-700 px-6 py-3 font-bold font-rubik text-white text-heading-3 hover:bg-blue-600 mx-4">Recevoir le facture par mail</button>
+        <button v-if="step===5" @click="getOrderInvoice()" type="button" class="rounded-lg bg-blue-700 px-6 py-3 font-bold font-rubik text-white text-heading-3 hover:bg-blue-600 mx-4">Recevoir le facture par mail</button>
       </div>
       <div class="lg:grid grid-cols-12 mx-4">
         <div class="col-span-7 px-4 ">

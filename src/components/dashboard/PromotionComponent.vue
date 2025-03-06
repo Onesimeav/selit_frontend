@@ -90,7 +90,7 @@ watch(()=>promotionStore.promotions,(newPromotions)=>{
 
 <template>
   <div class="p-4 mt-24 sm:ml-64">
-    <div v-if="promotions && promotions.data.length>0">
+
       <div class="flex justify-between w-full">
         <search-bar-component @reset-search-filter="filterCategoriesBySearchTerm" @search="searchTerm => filterCategoriesBySearchTerm(searchTerm)"/>
         <div class="flex items-center justify-between">
@@ -98,7 +98,8 @@ watch(()=>promotionStore.promotions,(newPromotions)=>{
           <shop-filter-component @reset-shop-filter="filterCategoriesByShop" @change-shop="shopId => filterCategoriesByShop(shopId)"/>
         </div>
       </div>
-      <div class="flex flex-wrap">
+    <div v-if="promotions && promotions.data.length>0">
+      <div  class="flex flex-wrap">
         <div v-for="promotion in promotions.data" :key="promotion.id">
           <div class="border-none rounded-lg shadow shadow-gray-300 hover:shadow-md mx-4 my-8 p-4">
             <button @click="redirectToPromotionDetails(promotion.id)" class="my-4">

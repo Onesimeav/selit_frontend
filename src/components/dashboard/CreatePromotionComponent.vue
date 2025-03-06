@@ -221,7 +221,7 @@ watch(()=>productStore.products,(newProducts)=>{
         </button>
       </div>
       <category-product-table :products="selectedProducts" @remove-products="productList => removeProductFromPromotion(productList)"/>
-      <button type="submit" :disabled="!verifyCreateCategoryFormValues()"  :class="verifyCreateCategoryFormValues()?'bg-appBlue':'bg-blue-400'" class=" self-center w-1/5 border-none font-poppins font-medium text-heading-3 text-white rounded-lg px-2 py-2 m-8 hover:border-none ">Créer la catégorie</button>
+      <button type="submit" :disabled="!verifyCreateCategoryFormValues()"  :class="verifyCreateCategoryFormValues()?'bg-appBlue':'bg-blue-400'" class=" self-center w-1/5 border-none font-poppins font-medium text-heading-3 text-white rounded-lg px-2 py-2 m-8 hover:border-none ">Créer la promotion</button>
     </form>
     <!-- Add product modal  -->
     <div id="add-product-modal" tabindex="-1" class="hidden overflow-y-auto overflow-x-hidden fixed top-0 right-0 left-0 z-50 justify-center items-center w-full md:inset-0 h-[calc(100%-1rem)] max-h-full">
