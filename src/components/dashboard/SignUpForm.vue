@@ -3,6 +3,7 @@ import { onMounted, ref } from 'vue'
   import { initFlowbite } from 'flowbite'
 import { useUserStore } from '@/stores/dashboard/user'
 import { useRouter } from 'vue-router'
+import DefaultErrorToast from '@/components/utils/DefaultErrorToast.vue'
 
   const step = ref(1);
   const signUpInfo = ref({
@@ -12,6 +13,9 @@ import { useRouter } from 'vue-router'
     confirmPassword:'',
   })
   const showPassword = ref(false);
+  const loading = ref(false);
+  const errorMessage = ref<string>();
+const showErrorToast = ref<boolean>(false);
   const userStore = useUserStore();
   const router = useRouter();
 
@@ -20,14 +24,21 @@ import { useRouter } from 'vue-router'
   }
 
   const createAccount = async ()=>{
+    loading.value = true;
+    showErrorToast.value = false;
     if (checkSignUpValues()){
       if (await userStore.createUserAccount(signUpInfo.value.username,signUpInfo.value.email,signUpInfo.value.password)){
+        loading.value = false;
         await router.push('/verify-user');
       }else{
-        console.log('Erreur lors de la création du compte')
+        loading.value = false;
+        errorMessage.value='Erreur lors de la création du compte';
+        showErrorToast.value = true;
       }
     }else{
-      console.log('Mot des passes différents ou informations manquantes')
+      loading.value = false;
+      errorMessage.value='Mot des passes différents ou informations manquantes';
+      showErrorToast.value = true;
     }
   }
 
@@ -35,6 +46,7 @@ import { useRouter } from 'vue-router'
 </script>
 
 <template>
+  <default-error-toast :message="errorMessage" :show="showErrorToast"/>
   <ol class="flex items-center w-full text-sm font-medium text-center text-gray-500 dark:text-gray-400 sm:text-base m-6">
     <li :class="step!=1 && signUpInfo.email!='' ?'text-appBlue':''" class="flex md:w-full items-center font-poppins dark:text-blue-500 sm:after:content-[''] after:w-full after:h-1 after:border-b after:border-gray-200 after:border-1 after:hidden sm:after:inline-block after:mx-6 xl:after:mx-10 dark:after:border-gray-700">
        <button type="button" @click="step=1" >

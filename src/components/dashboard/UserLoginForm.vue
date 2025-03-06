@@ -2,16 +2,22 @@
 import { onMounted, ref } from 'vue'
 import { initFlowbite } from 'flowbite'
 import { useRouter } from 'vue-router'
-
+import DefaultLoader from '@/components/utils/DefaultLoader.vue'
+  const props = defineProps<{
+    loading?:boolean;
+  }>()
   const router = useRouter();
   const emit = defineEmits<{
     (event:'login',loginInfo:{email:string,password:string}):{email:string,password:string};
   }>()
+
   const loginInfo =ref({
     email:'',
     password:'',
   })
   const showPassword = ref(false);
+
+
   const redirectToForgotPasswordPage =()=>{
     router.push('/forgot-password');
   }
@@ -51,7 +57,10 @@ import { useRouter } from 'vue-router'
         <button type="button" @click="redirectToForgotPasswordPage" class=" underline font-poppins font-normal text-normal-text text-appBlue">J'ai oublié mon mot de passe</button>
       </div>
     </div>
-    <button type="submit" :disabled=" loginInfo.email=='' || loginInfo.password==''" :class="loginInfo.email=='' || loginInfo.password==''?'bg-blue-400':'bg-appBlue'" class="text-white font-poppins font-medium text-heading-2 border-none rounded-full px-14 py-2 w-full">Se connecter</button>
+    <button type="submit" :disabled=" loginInfo.email=='' || loginInfo.password==''" :class="loginInfo.email=='' || loginInfo.password==''?'bg-blue-400':'bg-appBlue'" class="flex justify-center text-white font-poppins font-medium text-heading-2 border-none rounded-full px-14 py-2 w-full">
+      <default-loader v-if="loading" :loading="loading"/>
+      <span v-else >Se connecter</span>
+    </button>
   </form>
 
 </template>

@@ -17,8 +17,7 @@ const router = useRouter();
 
 const shops = ref<Shop[]>();
 const searchWord = ref<string>();
-ref<number>()
-const publish = ref<boolean>()
+const publish = ref<boolean>();
 
 const getShops = async ()=>{
   while (userStore.loading){
@@ -59,7 +58,6 @@ watch(()=>shopStore.shops,(newShops)=>{
 
 <template>
   <div class="p-4 mt-24 sm:ml-64">
-    <div v-if="shops">
       <div class="flex justify-between w-full">
         <search-bar-component @reset-search-filter="filterShopsBySearchTerm" @search="searchTerm => filterShopsBySearchTerm(searchTerm)"/>
         <div class="flex items-center justify-between">
@@ -67,6 +65,7 @@ watch(()=>shopStore.shops,(newShops)=>{
           <shop-published-status-filter @change-status="published => filterShopByPublishedStatus(published)" @reset-shop-filter="filterShopByPublishedStatus()"/>
         </div>
       </div>
+    <div v-if="shops && shops.length>0">
       <div class="flex flex-wrap">
         <div v-for="shop in shops" :key="shop.id">
           <div class="border-none rounded-lg shadow shadow-gray-300 hover:shadow-md mx-4 my-8 p-4">
