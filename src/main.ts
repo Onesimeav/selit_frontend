@@ -9,6 +9,7 @@ import shopRouter from '@/router/shopRouter'
 import dashboardRouter from './router'
 import axios from 'axios'
 import { useRouter } from 'vue-router'
+import adminRouter from '@/router/adminRouter'
 
 
 const app = createApp(App)
@@ -16,6 +17,7 @@ const app = createApp(App)
 const host = window.location.host;
 const subdomain = host.split('.');
 let isDashboard : boolean = false;
+let isAdmin : boolean = false;
 const router = ()=>{
   let routes;
   if (subdomain[0]==='www'){
@@ -23,21 +25,32 @@ const router = ()=>{
       routes= dashboardRouter;
       isDashboard = true;
     }else{
-      routes=shopRouter;
+      if (subdomain[1]==='admin'){
+        isAdmin = true;
+        routes = adminRouter;
+      }else {
+        routes=shopRouter;
+      }
     }
   }else if(subdomain[0]===import.meta.env.VITE_DOMAIN_NAME){
     routes = dashboardRouter;
     isDashboard = true;
   }else {
-    routes= shopRouter;
+    if (subdomain[0]==='admin'){
+      isAdmin = true;
+      routes = adminRouter;
+    }else {
+      routes= shopRouter;
+    }
   }
   return routes;
 }
+
 app.use(createPinia())
 app.use(router())
 app.config.globalProperties.$axios = axios;
 axios.defaults.baseURL='https://selit-backend.onrender.com/api/v1';
-if (isDashboard){
+if (isDashboard || isAdmin){
   axios.interceptors.request.use((config)=>{
     const token = localStorage.getItem('token');
     if (token){

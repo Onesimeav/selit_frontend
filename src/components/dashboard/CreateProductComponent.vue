@@ -9,6 +9,8 @@ import type { InstanceOptions } from 'flowbite';
 import type { CreateProduct } from '@/requests/create-product'
 import { useDashboardProductStore } from '@/stores/dashboard/product'
 import { useRouter } from 'vue-router'
+import DefaultLoader from '@/components/utils/DefaultLoader.vue'
+import DefaultErrorToast from '@/components/utils/DefaultErrorToast.vue'
 
 const startCarousel = ref(false);
 const specificationContainers = ref([{id:1, name:'', value:''}]);
@@ -28,7 +30,10 @@ const productInfos=ref<{
   images:null,
   videos:null,
   specifications:[],
-})
+});
+const loading = ref(false);
+const errorMessage = ref("");
+const showErrorMessage = ref(false);
 
   const handleMediaChange = ()=>{
     startCarousel.value = true;
@@ -44,6 +49,8 @@ const setSpecification = (container:{id:number,name:string,value:string})=>{
 
   const createProducts= async ()=>{
     if (productInfos.value.name && productInfos.value.description && productInfos.value.price && productInfos.value.specifications && productInfos.value.images){
+      loading.value = true;
+      showErrorMessage.value = false;
       const product:CreateProduct = {
         name:productInfos.value.name,
         description:productInfos.value.description,
@@ -55,12 +62,17 @@ const setSpecification = (container:{id:number,name:string,value:string})=>{
         product.videos=productInfos.value.videos
       }
       if (await productStore.createProduct(product)){
+        loading.value = false;
         await router.push('/product');
       }else{
-        console.log("Echec de l'opération, veuillez réessayer")
+        loading.value = false;
+        errorMessage.value = "Echec de l'opération, veuillez réessayer";
+        showErrorMessage.value = true;
       }
     }else{
-      console.log('Une erreur est survenue')
+      loading.value = false;
+      errorMessage.value = "Veuillez remplir les informations nécéssaires";
+      showErrorMessage.value = true;
     }
   }
 
@@ -214,6 +226,7 @@ onMounted(initFlowbite)
 </script>
 
 <template>
+  <default-error-toast :message="errorMessage" :show="showErrorMessage" />
   <div class="p-4 mt-24 sm:ml-64">
     <div class="grid grid-cols-8 items-center mx-4 mb-8">
       <div class="col-span-2">
@@ -305,7 +318,10 @@ onMounted(initFlowbite)
           </div>
         </div>
 
-        <button type="submit" class=" self-center w-1/5 bg-appBlue border-none font-poppins font-medium text-heading-3 text-white rounded-lg px-14 py-2 m-8 hover:border-none ">Créer le produit</button>
+        <button type="submit" class="flex justify-center w-1/5 bg-appBlue border-none font-poppins font-medium text-heading-3 text-white rounded-lg px-14 py-2 m-8 hover:border-none ">
+          <default-loader v-if="loading" :loading="loading"/>
+          <span v-else >Créer le produit</span>
+        </button>
       </form>
     </div>
 

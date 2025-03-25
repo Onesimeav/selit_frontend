@@ -7,6 +7,9 @@ import { useDashboardProductStore } from '@/stores/dashboard/product'
 import { useRouter } from 'vue-router'
 import { useDashboardCategoryStore } from '@/stores/dashboard/category'
 import { useDashboardPromotionStore } from '@/stores/dashboard/promotion'
+import DefaultLoader from '@/components/utils/DefaultLoader.vue'
+import DefaultErrorToast from '@/components/utils/DefaultErrorToast.vue'
+import DefaultSuccesToast from '@/components/utils/DefaultSuccesToast.vue'
 
 const props = defineProps<{
     products: Page<Product>,
@@ -29,6 +32,11 @@ const props = defineProps<{
   const categoryStore = useDashboardCategoryStore();
   const deleteProductModal = ref<ModalInterface>();
   const promotionStore = useDashboardPromotionStore();
+  const loading = ref(false);
+  const errorMessage = ref("");
+  const successMessage = ref("");
+  const showErrorMessage = ref(false);
+  const showSuccessMessage = ref(false);
 
   const allProductCheckbox = ()=>{
    if(props.products.data.length===selectedProducts.value.length){
@@ -67,48 +75,87 @@ const props = defineProps<{
   }
 
   const deleteProducts= async ()=>{
+    loading.value = true;
+    showErrorMessage.value = false;
+    showSuccessMessage.value = false;
     if (await productStore.deleteProducts(selectedProducts.value)){
       selectedProducts.value=[];
       emit('product-delete');
-      console.log('Opération réussie');
+      loading.value = false;
       if (deleteProductModal.value){
         deleteProductModal.value.hide();
+        successMessage.value = "Produit supprimé";
+        showSuccessMessage.value = true;
       }else {
-        console.log("Une erreur est survenue, veuillez recharger la page")
+        errorMessage.value = "Une erreur est survenue, veuillez recharger la page";
+        showErrorMessage.value = true;
       }
     }else {
-      console.log("Echec de l'opération");
+      if (deleteProductModal.value){
+        deleteProductModal.value.hide();
+        errorMessage.value = "Echec de l'opération";
+        showErrorMessage.value = true;
+      }else {
+        errorMessage.value = "Une erreur est survenue, veuillez recharger la page";
+        showErrorMessage.value = true;
+      }
     }
   }
 
   const removeProduct = async ()=>{
     if (props.categoryDetailPage && props.categoryId){
+      loading.value = true;
+      showErrorMessage.value = false;
+      showSuccessMessage.value = false;
       if (await categoryStore.removeProductFromCategory(props.categoryId,selectedProducts.value)){
-        console.log("Opération réussi");
         emit('product-removed');
+        loading.value=false;
         if (deleteProductModal.value){
           deleteProductModal.value.hide();
+          successMessage.value = "Produit retiré";
+          showSuccessMessage.value = true;
         }else{
-          console.log("Une erreur est survenue, veuillez recharger la page")
+          errorMessage.value = "Une erreur est survenue, veuillez recharger la page";
+          showErrorMessage.value = true;
         }
       }else{
-        console.log("Echec de l'opération");
+        if (deleteProductModal.value){
+          deleteProductModal.value.hide();
+          errorMessage.value = "Echec de l'opération";
+          showErrorMessage.value = true;
+        }else {
+          errorMessage.value = "Une erreur est survenue, veuillez recharger la page";
+          showErrorMessage.value = true;
+        }
       }
     }
   }
 
   const removeProductFromPromotion = async ()=>{
     if (props.promotionDetailPage && props.categoryId){
+      loading.value = true;
+      showErrorMessage.value = false;
+      showSuccessMessage.value = false;
       if (await promotionStore.removeProductFromPromotion(props.categoryId,selectedProducts.value)){
-        console.log("Opération réussi");
         emit('product-removed');
+        loading.value =false;
         if (deleteProductModal.value){
           deleteProductModal.value.hide();
+          successMessage.value = "Produit retiré";
+          showSuccessMessage.value = true;
         }else{
-          console.log("Une erreur est survenue, veuillez recharger la page")
+          errorMessage.value = "Une erreur est survenue, veuillez recharger la page";
+          showErrorMessage.value = true;
         }
       }else{
-        console.log("Echec de l'opération");
+        if (deleteProductModal.value){
+          deleteProductModal.value.hide();
+          errorMessage.value = "Echec de l'opération";
+          showErrorMessage.value = true;
+        }else {
+          errorMessage.value = "Une erreur est survenue, veuillez recharger la page";
+          showErrorMessage.value = true;
+        }
       }
     }
   }
@@ -148,6 +195,8 @@ const props = defineProps<{
 </script>
 
 <template>
+    <default-error-toast :message="errorMessage" :show="showErrorMessage" />
+    <default-succes-toast :message="successMessage" :show="showSuccessMessage" />
     <div v-if="selectedProducts.length!=0 && (!categoryPage || categoryDetailPage) && deleteProductModal" class="relative justify-items-end end-6 ">
       <button type="button" @click="deleteProductModal.show()"  class=" flex justify-around items-center border-none bg-red-700 rounded-lg px-4 py-2 text-white font-poppins font-bold text-normal-text m-2">
         Supprimer
@@ -239,13 +288,16 @@ const props = defineProps<{
           <h3 class="mb-5 text-lg font-normal text-gray-500 dark:text-gray-400">Voulez vous vraiment supprimer
             {{selectedProducts.length <= 1 ? `ce produit` : `ces produits (${selectedProducts.length})`}} ?</h3>
           <button v-if="categoryDetailPage" @click="removeProduct()" type="button" class="text-white bg-red-600 hover:bg-red-800 focus:ring-4 focus:outline-none focus:ring-red-300 dark:focus:ring-red-800 font-medium rounded-lg text-sm inline-flex items-center px-5 py-2.5 text-center">
-            Supprimer
+            <default-loader v-if="loading" :loading="loading"/>
+            <span v-else >Supprimer</span>
           </button>
           <button v-if="promotionDetailPage " @click="removeProductFromPromotion()" type="button" class="text-white bg-red-600 hover:bg-red-800 focus:ring-4 focus:outline-none focus:ring-red-300 dark:focus:ring-red-800 font-medium rounded-lg text-sm inline-flex items-center px-5 py-2.5 text-center">
-            Supprimer
+            <default-loader v-if="loading" :loading="loading"/>
+            <span v-else >Supprimer</span>
           </button>
           <button v-if="!categoryDetailPage && !promotionDetailPage" @click="deleteProducts()" type="button" class="text-white bg-red-600 hover:bg-red-800 focus:ring-4 focus:outline-none focus:ring-red-300 dark:focus:ring-red-800 font-medium rounded-lg text-sm inline-flex items-center px-5 py-2.5 text-center">
-            Supprimer
+            <default-loader v-if="loading" :loading="loading"/>
+            <span v-else >Supprimer</span>
           </button>
           <button @click="deleteProductModal.hide()" type="button" class="py-2.5 px-5 ms-3 text-sm font-medium text-gray-900 focus:outline-none bg-white rounded-lg border border-gray-200 hover:bg-gray-100 hover:text-blue-700 focus:z-10 focus:ring-4 focus:ring-gray-100 dark:focus:ring-gray-700 dark:bg-gray-800 dark:text-gray-400 dark:border-gray-600 dark:hover:text-white dark:hover:bg-gray-700">Annuler</button>
         </div>

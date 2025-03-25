@@ -12,6 +12,8 @@ import type { Product } from '@/models/product'
 import type { Promotion } from '@/models/promotion'
 import { useDashboardPromotionStore } from '@/stores/dashboard/promotion'
 import type { CreatePromotion } from '@/requests/create-promotion'
+import DefaultErrorToast from '@/components/utils/DefaultErrorToast.vue'
+import DefaultLoader from '@/components/utils/DefaultLoader.vue'
 
 const promotionStore = useDashboardPromotionStore();
 const route = useRoute();
@@ -27,6 +29,10 @@ const addProductModal = ref<ModalInterface>();
 const shopProducts = ref<Page<Product>>();
 const selectedProducts = ref<Product[]>([]);
 const searchWord = ref<string>();
+const loading = ref(false);
+const errorMessage = ref("");
+const showErrorMessage = ref(false);
+
 
 const getPromotion = async ()=>{
   promotion.value = await promotionStore.getPromotion(Number(route.params.id));
@@ -106,6 +112,8 @@ const verifyPromotionUpdateValues = () =>{
 
 const updatePromotion = async ()=>{
   if (verifyPromotionUpdateValues() && updatedPromotion.value){
+    loading.value = false;
+    showErrorMessage.value = false;
     const query :CreatePromotion = {
       name: updatedPromotion.value.name,
       autoApply: updatedPromotion.value.autoApply,
@@ -121,15 +129,22 @@ const updatePromotion = async ()=>{
           productsIds.push(product.id);
         });
         if (await promotionStore.addProductToPromotion(Number(route.params.id),productsIds)){
-          console.log("Opération réussi");
+          loading.value = false;
         }else{
-          console.log("Echec de l'opération");
+          loading.value = false;
+          errorMessage.value = "Echec de l'ajout  des produits";
+          showErrorMessage.value = true;
+          setTimeout(()=>{
+            router.push(`/promotion/${route.params.id}`);
+          },2000);
+          return
         }
       }
-      console.log("Opération réussi");
       await router.push(`/promotion/${route.params.id}`);
     }else {
-      console.log("Echec de l'opération");
+      loading.value = false;
+      errorMessage.value = "Echec de l'opération";
+      showErrorMessage.value = true;
     }
   }
 }
@@ -155,6 +170,7 @@ watch(()=>productStore.products,(newProducts)=>{
 </script>
 
 <template>
+  <default-error-toast :message="errorMessage" :show="showErrorMessage" />
   <div class="p-4 mt-24 sm:ml-64">
     <div class="grid grid-cols-8 items-center mx-4 mb-8">
       <div class="col-span-2">
@@ -216,7 +232,10 @@ watch(()=>productStore.products,(newProducts)=>{
           <category-product-table :products="selectedProducts" @remove-products="productList => removeProductFromCategory(productList)"/>
         </div>
         <product-table v-if="products && products.data && products.data.length>0" :products="products" :promotion-detail-page="true" :category-id="promotion.id" @load-more="loadMorePromotionProducts()" @product-removed="getPromotionProducts()"/>
-        <button type="submit" :disabled="!verifyPromotionUpdateValues()"  :class="verifyPromotionUpdateValues()?'bg-appBlue':'bg-blue-400'" class=" self-center w-1/5 border-none font-poppins font-medium text-heading-3 text-white rounded-lg px-2 py-2 m-8 hover:border-none ">Sauvegarder</button>
+        <button type="submit" :disabled="!verifyPromotionUpdateValues()"  :class="verifyPromotionUpdateValues()?'bg-appBlue':'bg-blue-400'" class=" self-center w-1/5 border-none font-poppins font-medium text-heading-3 text-white rounded-lg px-2 py-2 m-8 hover:border-none ">
+          <default-loader v-if="loading" :loading="loading"/>
+          <span v-else >Sauvegarder</span>
+        </button>
       </form>
       <!-- Add product modal  -->
       <div id="add-product-modal" tabindex="-1" class="hidden overflow-y-auto overflow-x-hidden fixed top-0 right-0 left-0 z-50 justify-center items-center w-full md:inset-0 h-[calc(100%-1rem)] max-h-full">

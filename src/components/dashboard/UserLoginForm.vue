@@ -5,6 +5,7 @@ import { useRouter } from 'vue-router'
 import DefaultLoader from '@/components/utils/DefaultLoader.vue'
   const props = defineProps<{
     loading?:boolean;
+    admin?:boolean;
   }>()
   const router = useRouter();
   const emit = defineEmits<{
@@ -30,7 +31,7 @@ import DefaultLoader from '@/components/utils/DefaultLoader.vue'
 </script>
 
 <template>
-  <form @submit.prevent="login">
+  <form @submit.prevent="login" class="max-w-96">
     <div class="mb-5">
       <label for="email" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Email</label>
       <input type="email" v-model="loginInfo.email" id="email" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" placeholder="name@flowbite.com" required />
@@ -53,11 +54,11 @@ import DefaultLoader from '@/components/utils/DefaultLoader.vue'
         </div>
       </div>
       <input :type="showPassword?'text':'password'" v-model="loginInfo.password" id="password" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" placeholder="•••••••••" required />
-      <div class=" flex justify-end">
+      <div v-if="!admin" class=" flex justify-end">
         <button type="button" @click="redirectToForgotPasswordPage" class=" underline font-poppins font-normal text-normal-text text-appBlue">J'ai oublié mon mot de passe</button>
       </div>
     </div>
-    <button type="submit" :disabled=" loginInfo.email=='' || loginInfo.password==''" :class="loginInfo.email=='' || loginInfo.password==''?'bg-blue-400':'bg-appBlue'" class="flex justify-center text-white font-poppins font-medium text-heading-2 border-none rounded-full px-14 py-2 w-full">
+    <button type="submit" :disabled=" loginInfo.email=='' || loginInfo.password==''" :class="loginInfo.email=='' || loginInfo.password==''?'bg-blue-400':'bg-appBlue'" class="flex justify-center text-white font-poppins max-h-12 font-medium text-heading-2 border-none rounded-full px-14 py-2 w-full">
       <default-loader v-if="loading" :loading="loading"/>
       <span v-else >Se connecter</span>
     </button>

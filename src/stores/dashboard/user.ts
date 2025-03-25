@@ -50,6 +50,26 @@ export const useUserStore = defineStore('user',{
       return false;
     },
 
+    async loginAdmin (email: string, password: string): Promise<boolean>{
+      this.loading = true;
+
+      try {
+        const query = { email: email, password: password };
+        const apiResponse = await axios.get('admin-login', {params:query});
+
+        if (apiResponse.status >= 200 && apiResponse.status < 300) {
+          localStorage.setItem('token', apiResponse.data.access_token);
+          return await this.getCurrentUser();
+        }
+      } catch (error) {
+        this.errorMessage = "Login failed : " + error;
+      } finally {
+        this.loading = false;
+      }
+
+      return false;
+    },
+
     async googleLogin():Promise<void>{
       this.loading = true;
       const apiResponse = await axios.get('google-auth')

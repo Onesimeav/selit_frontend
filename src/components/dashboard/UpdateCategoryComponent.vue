@@ -12,6 +12,8 @@
   import type { Page } from '@/models/page'
   import type { Product } from '@/models/product'
   import { useDashboardProductStore } from '@/stores/dashboard/product'
+  import DefaultErrorToast from '@/components/utils/DefaultErrorToast.vue'
+  import DefaultLoader from '@/components/utils/DefaultLoader.vue'
 
   const categoryStore = useDashboardCategoryStore();
   const route = useRoute();
@@ -27,6 +29,10 @@
   const selectedProducts = ref<Product[]>([]);
   const searchWord = ref<string>();
   const categoryShop = ref<number>();
+  const loading = ref(false);
+  const errorMessage = ref("");
+  const showErrorMessage = ref(false);
+
 
   const getCategory = async ()=>{
     category.value = await categoryStore.getCategory(Number(route.params.id));
@@ -112,6 +118,8 @@
 
   const updateCategory = async ()=>{
     if (verifyCategoryUpdateValues() && categoryName.value){
+      loading.value = false;
+      showErrorMessage.value = false;
       if (await categoryStore.updateCategory(Number(route.params.id),categoryName.value)){
         if (selectedProducts.value && selectedProducts.value.length>0){
           const productsIds:number[] = [];
@@ -119,15 +127,22 @@
             productsIds.push(product.id);
           });
           if (await categoryStore.addProductToCategory(Number(route.params.id),productsIds)){
-            console.log("Opération réussi");
+            loading.value = false;
           }else{
-            console.log("Echec de l'opération");
+            loading.value = false;
+            errorMessage.value = "Echec de l'ajout  des produits";
+            showErrorMessage.value = true;
+            setTimeout(()=>{
+              router.push(`/category/${route.params.id}`);
+            },2000);
+            return
           }
         }
-        console.log("Opération réussi");
         await router.push(`/category/${route.params.id}`);
       }else {
-        console.log("Echec de l'opération");
+        loading.value = false;
+        errorMessage.value = "Echec de l'opération";
+        showErrorMessage.value = true;
       }
     }
   }
@@ -154,6 +169,7 @@
 </script>
 
 <template>
+  <default-error-toast :message="errorMessage" :show="showErrorMessage" />
   <div class="p-4 mt-24 sm:ml-64">
     <div class="grid grid-cols-8 items-center mx-4 mb-8">
       <div class="col-span-2">
@@ -184,7 +200,10 @@
           <category-product-table :products="selectedProducts" @remove-products="productList => removeProductFromCategory(productList)"/>
         </div>
         <product-table v-if="category.products && category.products.data && category.products.data.length>0" :products="category.products" :category-id="category.id" :category-detail-page="true" @load-more="loadMoreCategoryProducts()" @product-removed="getCategoryProducts()"/>
-        <button type="submit" :disabled="!verifyCategoryUpdateValues()"  :class="verifyCategoryUpdateValues()?'bg-appBlue':'bg-blue-400'" class=" self-center w-1/5 border-none font-poppins font-medium text-heading-3 text-white rounded-lg px-2 py-2 m-8 hover:border-none ">Sauvegarder</button>
+        <button type="submit" :disabled="!verifyCategoryUpdateValues()"  :class="verifyCategoryUpdateValues()?'bg-appBlue':'bg-blue-400'" class=" self-center w-1/5 border-none font-poppins font-medium text-heading-3 text-white rounded-lg px-2 py-2 m-8 hover:border-none ">
+          <default-loader v-if="loading" :loading="loading"/>
+          <span v-else >Sauvegarder</span>
+        </button>
       </form>
       <!-- Add product modal  -->
       <div id="add-product-modal" tabindex="-1" class="hidden overflow-y-auto overflow-x-hidden fixed top-0 right-0 left-0 z-50 justify-center items-center w-full md:inset-0 h-[calc(100%-1rem)] max-h-full">

@@ -16,6 +16,9 @@ import {
 } from 'flowbite'
 import PreviousPageButton from '@/components/shop/PreviousPageButton.vue'
 import type { Specification } from '@/models/specification'
+import DefaultErrorToast from '@/components/utils/DefaultErrorToast.vue'
+import DefaultSuccesToast from '@/components/utils/DefaultSuccesToast.vue'
+import DefaultLoader from '@/components/utils/DefaultLoader.vue'
 
   const product = ref<Product>();
   const router = useRoute();
@@ -30,6 +33,11 @@ import type { Specification } from '@/models/specification'
   const updatedProduct = ref<Product>();
   const productSpecification = ref([]);
   const productMedia = ref<{images:File[],videos:File[]}>();
+  const loading = ref(false);
+  const errorMessage = ref("");
+  const successMessage = ref("");
+  const showErrorMessage = ref(false);
+  const showSuccessMessage = ref(false);
 
   const getProductDetails =  async ()=>{
     product.value= await productStore.getProductDetails(Number(router.params.id));
@@ -67,6 +75,9 @@ import type { Specification } from '@/models/specification'
 
   const deleteProductMedia= async ()=>{
     if (mediaToBeDeleted.value){
+      loading.value = true;
+      showSuccessMessage.value = false;
+      showErrorMessage.value = false;
       if (await productStore.deleteProductMedia(Number(router.params.id),[mediaToBeDeleted.value])){
        if (product.value && updatedProduct.value){
          product.value.medias= (await productStore.getProductDetails(Number(router.params.id))).medias;
@@ -75,18 +86,27 @@ import type { Specification } from '@/models/specification'
          console.log('Une erreur est survenue, rechargez la page');
        }
         if (deleteMediaModal.value) deleteMediaModal.value.hide();
-        console.log('Media supprimée')
+        loading.value = false;
+        successMessage.value = "Media supprimée";
+        showSuccessMessage.value = true;
       }else {
-        console.log("Echec de l'opération");
+        loading.value = false;
+        errorMessage.value = "Echec de l'opération";
+        showErrorMessage.value = true;
       }
     }else {
-      console.log("Echec de l'opération");
+      loading.value = false;
+      errorMessage.value = "Une erreur est survenue";
+      showErrorMessage.value = true;
     }
 
   }
 
   const deleteProductSpecification = async ()=>{
     if(specificationToBeDeleted.value){
+      loading.value = true;
+      showSuccessMessage.value = false;
+      showErrorMessage.value = false;
       if (await productStore.deleteProductSpecification(Number(router.params.id), [specificationToBeDeleted.value])){
         if (product.value && updatedProduct.value){
           product.value.specifications=(await  productStore.getProductDetails(Number(router.params.id))).specifications;
@@ -95,12 +115,18 @@ import type { Specification } from '@/models/specification'
           console.log('Une erreur est survenue, rechargez la page');
         }
         if (deleteSpecificationModal.value) deleteSpecificationModal.value.hide();
-        console.log('Caractéristique supprimée');
+        loading.value = false;
+        successMessage.value = "Caractéristique supprimée";
+        showSuccessMessage.value = true;
       }else{
-        console.log("Echec de l'opération")
+        loading.value = false;
+        errorMessage.value = "Echec de l'opération";
+        showErrorMessage.value = true;
       }
     }else{
-      console.log("Echec de l'opération")
+      loading.value = false;
+      errorMessage.value = "Une erreur est survenue";
+      showErrorMessage.value = true;
     }
   }
 
@@ -282,14 +308,21 @@ import type { Specification } from '@/models/specification'
 
   const updateProduct = async ()=>{
     if (updatedValueCheck()){
+      loading.value = true;
+      showSuccessMessage.value = false;
+      showErrorMessage.value = false;
       if (productSpecification.value && Object.keys(productSpecification.value).length>=1){
         if (await productStore.addProductSpecification(Number(router.params.id),productSpecification.value)){}else {
-          return console.log("Echec de l'opération");
+          errorMessage.value = "Echec de la mise à jour des spécifications";
+          showErrorMessage.value = true;
+          return
         }
       }
       if (productMedia.value  ){
         if (await productStore.addProductMedia(Number(router.params.id),productMedia.value.images,productMedia.value.videos)){}else{
-          return console.log("Echec de l'opération");
+          errorMessage.value = "Echec de la mise à jour des médias";
+          showErrorMessage.value = false;
+          return
         }
       }
       if(updatedProduct.value && product.value){
@@ -306,14 +339,19 @@ import type { Specification } from '@/models/specification'
         }
         if (specifications.length>0){
           if (await productStore.updateProductSpecification(Number(router.params.id),specifications)){}else {
-            return console.log("Echec de l'opération");
+            errorMessage.value = "Echec de la mise à jour des spécifications";
+            showErrorMessage.value = true;
+            return
           }
         }
 
         if (await productStore.updateProduct(Number(router.params.id),updatedProduct.value.name,updatedProduct.value.description,updatedProduct.value.price)){
+          loading.value = false
           await route.push('/product');
         }else {
-          return console.log("Echec de l'opération");
+          errorMessage.value = "Echec de la mise à jour du produit";
+          showErrorMessage.value = true;
+          return
         }
 
       }
@@ -334,6 +372,8 @@ import type { Specification } from '@/models/specification'
 </script>
 
 <template>
+  <default-error-toast :message="errorMessage" :show="showErrorMessage"/>
+  <default-succes-toast :message="successMessage" :show="showSuccessMessage" />
   <div class="p-4 mt-24 sm:ml-64">
     <div class="grid grid-cols-8 items-center mx-4 mb-8">
       <div class="col-span-2">
@@ -451,7 +491,10 @@ import type { Specification } from '@/models/specification'
           </div>
         </div>
 
-        <button type="submit" :disabled="!updatedValueCheck()" :class="updatedValueCheck()?'bg-appBlue':'bg-blue-400'" class=" w-auto bg-appBlue border-none font-poppins font-medium text-heading-3 text-white rounded-lg px-8 py-2 m-8 ">Sauvegarder</button>
+        <button type="submit" :disabled="!updatedValueCheck()" :class="updatedValueCheck()?'bg-appBlue':'bg-blue-400'" class=" w-auto bg-appBlue border-none font-poppins font-medium text-heading-3 text-white rounded-lg px-8 py-2 m-8 ">
+          <default-loader v-if="loading" :loading="loading"/>
+          <span v-else >Sauvegarder</span>
+        </button>
       </form>
     </div>
     <!-- Delete media modal-->
@@ -470,7 +513,8 @@ import type { Specification } from '@/models/specification'
             </svg>
             <h3 class="mb-5 text-lg font-normal text-gray-500 dark:text-gray-400">Voulez-vous vraiment supprimer ce media ?</h3>
             <button @click="deleteProductMedia" type="button" class="text-white bg-red-600 hover:bg-red-800 focus:ring-4 focus:outline-none focus:ring-red-300 dark:focus:ring-red-800 font-medium rounded-lg text-sm inline-flex items-center px-5 py-2.5 text-center">
-              Supprimer
+              <default-loader v-if="loading" :loading="loading"/>
+              <span v-else >Supprimer</span>
             </button>
             <button @click="deleteMediaModal.hide()" type="button" class="py-2.5 px-5 ms-3 text-sm font-medium text-gray-900 focus:outline-none bg-white rounded-lg border border-gray-200 hover:bg-gray-100 hover:text-blue-700 focus:z-10 focus:ring-4 focus:ring-gray-100 dark:focus:ring-gray-700 dark:bg-gray-800 dark:text-gray-400 dark:border-gray-600 dark:hover:text-white dark:hover:bg-gray-700">
               Annuler</button>
@@ -494,7 +538,8 @@ import type { Specification } from '@/models/specification'
             </svg>
             <h3 class="mb-5 text-lg font-normal text-gray-500 dark:text-gray-400">Voulez-vous vraiment supprimer cette caratéristique?</h3>
             <button @click="deleteProductSpecification" type="button" class="text-white bg-red-600 hover:bg-red-800 focus:ring-4 focus:outline-none focus:ring-red-300 dark:focus:ring-red-800 font-medium rounded-lg text-sm inline-flex items-center px-5 py-2.5 text-center">
-              Supprimer
+              <default-loader v-if="loading" :loading="loading"/>
+              <span v-else >Supprimer</span>
             </button>
             <button @click="deleteSpecificationModal.hide()" type="button" class="py-2.5 px-5 ms-3 text-sm font-medium text-gray-900 focus:outline-none bg-white rounded-lg border border-gray-200 hover:bg-gray-100 hover:text-blue-700 focus:z-10 focus:ring-4 focus:ring-gray-100 dark:focus:ring-gray-700 dark:bg-gray-800 dark:text-gray-400 dark:border-gray-600 dark:hover:text-white dark:hover:bg-gray-700">
               Annuler</button>

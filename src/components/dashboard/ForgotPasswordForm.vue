@@ -3,6 +3,8 @@ import { onMounted, ref } from 'vue'
   import { initFlowbite } from 'flowbite'
 import { useUserStore } from '@/stores/dashboard/user'
 import { useRouter } from 'vue-router'
+import DefaultLoader from '@/components/utils/DefaultLoader.vue'
+import DefaultErrorToast from '@/components/utils/DefaultErrorToast.vue'
 
   const email = ref<string>('');
   const code = ref<number[]>([]);
@@ -11,6 +13,11 @@ import { useRouter } from 'vue-router'
   const step = ref(1);
   const userStore = useUserStore();
   const router = useRouter();
+
+const loading = ref(false);
+const errorMessage = ref<string>();
+const showErrorToast = ref<boolean>(false);
+
 
 const moveInputFocus = (event: Event): void => {
   // Narrow the event type to a KeyboardEvent
@@ -72,20 +79,34 @@ const moveInputFocus = (event: Event): void => {
 
 const sendPasswordResetCode = async()=>{
     if (email.value!=''&& step.value==1){
+      loading.value = true;
+      showErrorToast.value = false;
       if (await userStore.forgotPassword(email.value)){
+        loading.value = false;
         step.value=2;
+      }else{
+        loading.value = false;
+        errorMessage.value="Echec de l'envoie du mail";
+        showErrorToast.value = true;
       }
     }
   }
 
   const resetPassword = async () => {
     if (code.value.length==6 && passwordConfirm.value===password.value && step.value==3){
+      loading.value = true;
+      showErrorToast.value = false;
+
       const resetCodeToString = code.value.map(String);
       const resetCodeJoined = resetCodeToString.join('');
       const userResetCode = Number(resetCodeJoined);
-      console.log(userResetCode);
       if(await userStore.resetPassword(userResetCode,password.value)){
+        loading.value = false;
         await router.push('/login');
+      }else{
+        loading.value = false;
+        errorMessage.value="Echec du changement de mode passe";
+        showErrorToast.value = true;
       }
     }
   }
@@ -94,6 +115,7 @@ const sendPasswordResetCode = async()=>{
 </script>
 
 <template>
+  <default-error-toast :message="errorMessage" :show="showErrorToast"/>
   <div v-if="step==1">
     <p class="font-rubik font-normal text-normal-text mb-3">Une code sera envoyer à votre addresse mail afin de vous permettre <br> de changer votre mot de passe</p>
     <form  @submit.prevent="sendPasswordResetCode">
@@ -101,7 +123,10 @@ const sendPasswordResetCode = async()=>{
         <label for="email" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Votre adresse mail</label>
         <input type="email" v-model="email" id="email" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" placeholder="name@flowbite.com" required />
       </div>
-      <button type="submit" :disabled="email==''" :class="email==''?'bg-blue-400':'bg-appBlue'" class="text-white font-poppins font-medium text-heading-2 border-none rounded-full px-14 py-2 w-full">Suivant</button>
+      <button type="submit" :disabled="email==''" :class="email==''?'bg-blue-400':'bg-appBlue'" class="text-white font-poppins font-medium text-heading-2 border-none rounded-full px-14 py-2 w-full">
+        <default-loader v-if="loading" :loading="loading"/>
+        <span v-else > Suivant</span>
+      </button>
     </form>
   </div>
 

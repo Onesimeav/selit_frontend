@@ -9,10 +9,17 @@ import type { DeliveryMan } from '@/models/deliveryMan'
 import Pusher from 'pusher-js'
 import OrderSummaryCard from '@/components/shop/OrderSummaryCard.vue'
 import { initFlowbite, Modal, type ModalInterface } from 'flowbite'
+import DefaultLoader from '@/components/utils/DefaultLoader.vue'
+import DefaultSuccesToast from '@/components/utils/DefaultSuccesToast.vue'
+import DefaultErrorToast from '@/components/utils/DefaultErrorToast.vue'
 
 const orderStore = useDashboardOrderStore();
 const route = useRoute()
-
+const loading = ref(false);
+const errorMessage = ref<string>("");
+const sucessMessage = ref<string>("");
+const showErrorMessage = ref(false);
+const showSuccessMessage = ref(false);
 const order = ref<Order>();
 const deliveryMan= ref<DeliveryMan>();
 const orderStatus = ref<string>();
@@ -48,8 +55,14 @@ const getDeliveryManDetails = async ()=>{
 
 const approveOrder = async ()=>{
   if (order.value){
-    if (await orderStore.approveOrder(order.value.id)){}else{
-      console.log("Echec de l'opération")
+    loading.value = true;
+    showErrorMessage.value = false;
+    if (await orderStore.approveOrder(order.value.id)){
+      loading.value = false;
+    }else{
+      loading.value = false;
+      errorMessage.value = "Echec de l'opération"
+      showErrorMessage.value = false;
     }
   }
 }
@@ -60,34 +73,50 @@ const verifyDeliveryManInfos = ()=>{
 
 const sendToDeliveryMan = async ()=>{
   if (verifyDeliveryManInfos() && order.value && createDeliveryMan.value && deliveryModal.value){
+    loading.value = true;
+    showErrorMessage.value = false;
     if (await orderStore.deliverOrder(order.value.id, createDeliveryMan.value.email,createDeliveryMan.value.name,createDeliveryMan.value.surname,createDeliveryMan.value.number)){
-      console.log('Opération réussie');
+      loading.value = false;
       deliveryModal.value.hide();
     }else {
-      console.log("Echec de l'opération");
+      loading.value = false;
       deliveryModal.value.hide();
+      errorMessage.value = "Echec de l'opération"
+      showErrorMessage.value = true;
     }
   }
 }
 
 const cancelOrder = async ()=>{
   if (order.value && cancelOrderModal.value){
+    loading.value = true;
+    showErrorMessage.value = false;
+    showSuccessMessage.value = false;
     if (await orderStore.cancelOrder(order.value.order_reference)){
-      console.log('Opération réussie');
+      loading.value = false;
       cancelOrderModal.value.hide();
     }else {
-      console.log("Echec de l'opération");
+      loading.value = false;
       cancelOrderModal.value.hide();
+      errorMessage.value = "Echec de l'opération"
+      showErrorMessage.value = true;
     }
   }
 }
 
 const getOrderInvoice = async ()=>{
   if(order.value){
+    loading.value = true;
+    showErrorMessage.value = false;
+    showSuccessMessage.value = false;
     if (await orderStore.getOrderInvoice(order.value.order_reference)){
-      console.log('Opération réussie');
+      loading.value = false;
+      sucessMessage.value = "La facture vient d'être envoyer";
+      showSuccessMessage.value = true;
     }else{
-      console.log("Echec de l'opération");
+      loading.value = false;
+      errorMessage.value = "Echec de l'opération";
+      showErrorMessage.value = true;
     }
   }
 }
@@ -146,6 +175,8 @@ onMounted(async () => {
 </script>
 
 <template>
+  <default-succes-toast :show="showSuccessMessage" :message="sucessMessage" />
+  <default-error-toast :show="showErrorMessage" :message="errorMessage" />
   <div class="p-4 mt-24 sm:ml-64">
     <div class="grid grid-cols-8 items-center mx-4 mb-8">
       <div class="col-span-2">
@@ -176,10 +207,16 @@ onMounted(async () => {
         </div>
       </div>
       <div v-if="step" class="flex mx-8 mb-5">
-        <button v-if="step===1" type="button" @click="approveOrder()" class="rounded-lg bg-blue-700 px-6 py-3 font-bold font-rubik text-white text-heading-3 hover:bg-blue-600 mx-4">Approuver la commande</button>
+        <button v-if="step===1" type="button" @click="approveOrder()" class="rounded-lg bg-blue-700 px-6 py-3 font-bold font-rubik text-white text-heading-3 hover:bg-blue-600 mx-4">
+          <default-loader v-if="loading" :loading="loading"/>
+          <span v-else >Approuver la commande</span>
+        </button>
         <button v-if="step===2 && deliveryModal" type="button" @click="deliveryModal.show()" class="rounded-lg bg-blue-700 px-6 py-3 font-bold font-rubik text-white text-heading-3 hover:bg-blue-600 mx-4">Envoyer au livreur</button>
         <button v-if="step<5 && cancelOrderModal" type="button" @click="cancelOrderModal.show()" class="rounded-lg bg-red-700 px-6 py-3 font-bold font-rubik text-white text-heading-3 hover:bg-red-600 mx-4">Annuler</button>
-        <button v-if="step===5" @click="getOrderInvoice()" type="button" class="rounded-lg bg-blue-700 px-6 py-3 font-bold font-rubik text-white text-heading-3 hover:bg-blue-600 mx-4">Recevoir le facture par mail</button>
+        <button v-if="step===5" @click="getOrderInvoice()" type="button" class="rounded-lg bg-blue-700 px-6 py-3 font-bold font-rubik text-white text-heading-3 hover:bg-blue-600 mx-4">
+          <default-loader v-if="loading" :loading="loading"/>
+          <span v-else >Recevoir le facture par mail</span>
+        </button>
       </div>
       <div class="lg:grid grid-cols-12 mx-4">
         <div class="col-span-7 px-4 ">
@@ -251,7 +288,8 @@ onMounted(async () => {
             </svg>
             <h3 class="mb-5 text-lg font-normal text-gray-500 dark:text-gray-400">Voulez-vous vraiment annuler cette commande </h3>
             <button type="button" @click="cancelOrder()" class="text-white bg-red-600 hover:bg-red-800 focus:ring-4 focus:outline-none focus:ring-red-300 dark:focus:ring-red-800 font-medium rounded-lg text-sm inline-flex items-center px-5 py-2.5 text-center">
-              Confirmer
+              <default-loader v-if="loading" :loading="loading"/>
+              <span v-else >Confirmer</span>
             </button>
             <button @click="cancelOrderModal.hide()"  type="button" class="py-2.5 px-5 ms-3 text-sm font-medium text-gray-900 focus:outline-none bg-white rounded-lg border border-gray-200 hover:bg-gray-100 hover:text-blue-700 focus:z-10 focus:ring-4 focus:ring-gray-100 dark:focus:ring-gray-700 dark:bg-gray-800 dark:text-gray-400 dark:border-gray-600 dark:hover:text-white dark:hover:bg-gray-700">Annuler</button>
           </div>
@@ -297,7 +335,8 @@ onMounted(async () => {
               </div>
             </div>
             <button type="submit" :disabled="!verifyDeliveryManInfos()" :class="verifyDeliveryManInfos()?'bg-blue-700':'bg-blue-500'" class="text-white inline-flex items-center font-medium rounded-lg text-sm px-5 py-2.5 text-center ">
-              Envoyer
+              <default-loader v-if="loading" :loading="loading"/>
+              <span v-else > Envoyer</span>
             </button>
           </form>
         </div>

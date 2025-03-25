@@ -11,6 +11,9 @@ import { useDashboardPromotionStore } from '@/stores/dashboard/promotion'
 import type { Page } from '@/models/page'
 import type { Product } from '@/models/product'
 import type { CreatePromotion } from '@/requests/create-promotion'
+import DefaultErrorToast from '@/components/utils/DefaultErrorToast.vue'
+import DefaultSuccesToast from '@/components/utils/DefaultSuccesToast.vue'
+import DefaultLoader from '@/components/utils/DefaultLoader.vue'
 
 const promotionStore = useDashboardPromotionStore();
 const route = useRoute();
@@ -22,6 +25,13 @@ const deletePromotionId = ref<number>();
 const page = ref<number>(1);
 const clipboard = ref<CopyClipboardInterface>();
 const copied = ref<boolean>(false);
+const loadingPromotionStatus = ref(false);
+const loadingPromotionDeletion = ref(false);
+const errorMessage = ref("");
+const successMessage = ref("");
+const showErrorMessage = ref(false);
+const showSuccessMessage = ref(false);
+
 
 const getPromotionDetails = async()=>{
   promotion.value = await promotionStore.getPromotion(Number(route.params.id));
@@ -39,14 +49,21 @@ const getPromotionProducts = async ()=>{
 
 const deletePromotion= async ()=>{
   if(deletePromotionId.value){
+    loadingPromotionDeletion.value = true;
+    showErrorMessage.value = false;
+    showSuccessMessage.value = false;
     if (await promotionStore.deletePromotion(deletePromotionId.value)){
-      console.log('Catégorie supprimée');
+      loadingPromotionDeletion.value = false;
       await router.push({name:'category-list'});
     }else{
-      console.log("Echec de l'opération");
+      loadingPromotionDeletion.value = false;
+      errorMessage.value="Echec de l'opération";
+      showErrorMessage.value = true;
     }
   }else{
-    console.log("Une erreur est survenue");
+    loadingPromotionDeletion.value = false;
+    errorMessage.value ="Une erreur est survenue";
+    showErrorMessage.value = true;
   }
 }
 
@@ -81,7 +98,9 @@ const createCopyClipBoard = ()=>{
 
 const activateOrDesactivatePromotion = async ()=>{
   if (promotion.value){
-    console.log(promotion.value.active);
+    loadingPromotionStatus.value = true;
+    showErrorMessage.value = false;
+    showSuccessMessage.value = false;
     const query:CreatePromotion = {
       name:promotion.value.name,
       autoApply:promotion.value.autoApply,
@@ -90,12 +109,15 @@ const activateOrDesactivatePromotion = async ()=>{
       active:!promotion.value.active,
       shop_id:promotion.value.shop_id,
     }
-    console.log(query.active)
     if (await promotionStore.updatePromotion(promotion.value.id,query)){
-      console.log("Opération réussi");
+      loadingPromotionStatus.value = false;
+      successMessage.value = "Opération réussi";
+      showSuccessMessage.value = true;
       await getPromotionDetails();
     }else{
-      console.log("Echec de l'opération");
+      loadingPromotionStatus.value = false;
+      errorMessage.value ="Echec de l'opération";
+      showErrorMessage.value = true;
     }
   }
 }
@@ -109,6 +131,8 @@ onMounted(async()=>{
 </script>
 
 <template>
+  <default-error-toast :show="showErrorMessage" :message="errorMessage" />
+  <default-succes-toast :show="showSuccessMessage" :message="successMessage" />
   <div class="p-4 mt-24 sm:ml-64">
     <div class="grid grid-cols-8 items-center mx-4 mb-8">
       <div class="col-span-2">
@@ -126,8 +150,14 @@ onMounted(async()=>{
       <div  class="grid grid-cols-8 mb-5 ">
         <p class="col-span-4 font-bold font-poppins text-heading-2 text-gray-500 mb-5">Nom: <span class="text-black text-heading-3">{{promotion.name}}</span></p>
         <div class="col-span-4 mx-4">
-          <button @click="activateOrDesactivatePromotion()" v-if="promotion.active" type="button" class="bg-green-500 rounded-lg font-semibold font-poppins text-heading-3 text-white px-4 py-1">Désactiver</button>
-          <button @click="activateOrDesactivatePromotion()" v-else type="button" class="bg-appGray rounded-lg font-semibold font-poppins text-heading-3 text-white px-4 py-1">Activer</button>
+          <button @click="activateOrDesactivatePromotion()" v-if="promotion.active" type="button" class="bg-green-500 rounded-lg font-semibold font-poppins text-heading-3 text-white px-4 py-1">
+            <default-loader v-if="loadingPromotionStatus" :loading="loadingPromotionStatus"/>
+            <span v-else >Désactiver</span>
+          </button>
+          <button @click="activateOrDesactivatePromotion()" v-else type="button" class="bg-appGray rounded-lg font-semibold font-poppins text-heading-3 text-white px-4 py-1">
+            <default-loader v-if="loadingPromotionStatus" :loading="loadingPromotionStatus"/>
+            <span v-else >Activer</span>
+          </button>
         </div>
       </div>
       <div  class="grid grid-cols-8 mb-5 ">
@@ -180,7 +210,7 @@ onMounted(async()=>{
       <div v-else class=" w-full justify-center items-center">
         <p class="font-poppins font-normal text-normal-text text-appGray">Aucun produit disponible</p>
       </div>
-      <delete-element-modal element-name="cette promotion" :element-id="deletePromotionId" @delete-element="deletePromotion()" />
+      <delete-element-modal :loading="loadingPromotionDeletion" element-name="cette promotion" :element-id="deletePromotionId" @delete-element="deletePromotion()" />
     </div>
   </div>
 </template>

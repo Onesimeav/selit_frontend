@@ -10,6 +10,8 @@ import { useRouter } from 'vue-router'
 import type { Page } from '@/models/page'
 import { useDashboardPromotionStore } from '@/stores/dashboard/promotion'
 import type { Promotion } from '@/models/promotion'
+import DefaultErrorToast from '@/components/utils/DefaultErrorToast.vue'
+import DefaultSuccesToast from '@/components/utils/DefaultSuccesToast.vue'
 
 const userStore = useUserStore();
 const promotionStore = useDashboardPromotionStore();
@@ -19,7 +21,13 @@ const promotions = ref<Page<Promotion>>();
 const page = ref(1);
 const actualShop = ref<number>();
 const searchWord = ref<string>();
-const promotionToDelete = ref<number>()
+const promotionToDelete = ref<number>();
+const loading = ref(false);
+const errorMessage = ref("");
+const showErrorMessage = ref(false);
+const successMessage = ref("");
+const showSuccessMessage = ref(false);
+
 
 const getPromotions = async ()=>{
   while (userStore.loading){
@@ -56,11 +64,18 @@ const loadMore = async () => {
 };
 
 const deleteCategory = async (promotionId:number)=>{
+  loading.value = true;
+  showErrorMessage.value = false;
+  showSuccessMessage.value = false;
   if (await promotionStore.deletePromotion(promotionId)){
-    console.log("Promotion supprimée");
+    loading.value=false;
+    successMessage.value = "Promotion supprimée";
+    showSuccessMessage.value = true;
     await getPromotions();
   }else{
-    console.log("Echec de l'opération");
+    loading.value = false;
+    errorMessage.value="Echec de l'opération"
+    showErrorMessage.value = true;
   }
 }
 
@@ -89,15 +104,16 @@ watch(()=>promotionStore.promotions,(newPromotions)=>{
 </script>
 
 <template>
+  <default-error-toast :message="errorMessage" :show="showErrorMessage" />
+  <default-succes-toast :message="successMessage" :show="showSuccessMessage" />
   <div class="p-4 mt-24 sm:ml-64">
-
-      <div class="flex justify-between w-full">
-        <search-bar-component @reset-search-filter="filterCategoriesBySearchTerm" @search="searchTerm => filterCategoriesBySearchTerm(searchTerm)"/>
-        <div class="flex items-center justify-between">
-          <create-button route-name="create-promotion"/>
-          <shop-filter-component @reset-shop-filter="filterCategoriesByShop" @change-shop="shopId => filterCategoriesByShop(shopId)"/>
-        </div>
+    <div class="flex justify-between w-full">
+      <search-bar-component @reset-search-filter="filterCategoriesBySearchTerm" @search="searchTerm => filterCategoriesBySearchTerm(searchTerm)"/>
+      <div class="flex items-center justify-between">
+        <create-button route-name="create-promotion"/>
+        <shop-filter-component @reset-shop-filter="filterCategoriesByShop" @change-shop="shopId => filterCategoriesByShop(shopId)"/>
       </div>
+    </div>
     <div v-if="promotions && promotions.data.length>0">
       <div  class="flex flex-wrap">
         <div v-for="promotion in promotions.data" :key="promotion.id">
@@ -119,7 +135,7 @@ watch(()=>promotionStore.promotions,(newPromotions)=>{
       <div class="flex justify-center ">
         <button @click="loadMore" v-if="promotions.total>promotions.per_page"  class=" col-span-2 border-2 rounded-full px-4 border-appGray font-poppins font-semibold text-heading-3 text-appBlue hover:text-white hover:bg-appBlue hover:border-appBlue">Voir plus</button>
       </div>
-      <DeleteElementModal element-name="cette catégorie" :element-id="promotionToDelete" @delete-element="elementToDelete => deleteCategory(elementToDelete)" @hide-modal="promotionToDelete=undefined"  />
+      <DeleteElementModal :loading="loading" element-name="cette catégorie" :element-id="promotionToDelete" @delete-element="elementToDelete => deleteCategory(elementToDelete)" @hide-modal="promotionToDelete=undefined"  />
     </div>
     <div v-else class=" w-full justify-center items-center">
       <p class="font-poppins font-normal text-normal-text text-appGray">Aucune catégories disponible</p>

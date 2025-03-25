@@ -43,7 +43,7 @@ const initApp = () => {
   const domain = subdomain[0] === 'www' ? subdomain[1] : subdomain[0];
   const mainDomain = import.meta.env.VITE_DOMAIN_NAME;
 
-  if (domain === mainDomain) {
+  if (domain === mainDomain || domain ==='admin') {
     getCurrentUser();
   } else {
     startShop(domain);

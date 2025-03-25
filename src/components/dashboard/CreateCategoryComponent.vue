@@ -14,6 +14,8 @@ import { useDashboardProductStore } from '@/stores/dashboard/product'
 import { useDashboardCategoryStore } from '@/stores/dashboard/category'
 import type { CreateCategory } from '@/requests/create-catgory'
 import { useRouter } from 'vue-router'
+import DefaultErrorToast from '@/components/utils/DefaultErrorToast.vue'
+import DefaultLoader from '@/components/utils/DefaultLoader.vue'
 
 const shopStore = useDashboardShopStore();
 const userStore = useUserStore();
@@ -33,6 +35,9 @@ const shopProducts = ref<Page<Product>>();
 const selectedProducts = ref<Product[]>([]);
 const searchWord = ref<string>();
 const page = ref<number>(1);
+const loading = ref(false);
+const errorMessage = ref("");
+const showErrorMessage = ref(false);
 
 
 const getUserShops = async ()=>{
@@ -100,6 +105,8 @@ const createModal = ()=>{
 const createCategory =async ()=>{
   if (verifyCreateCategoryFormValues()){
     if(categoryDetails.value.shop){
+      loading.value=true;
+      showErrorMessage.value = false;
       const query:CreateCategory = {
         name:categoryDetails.value.name,
         shop_id: categoryDetails.value.shop,
@@ -112,17 +119,29 @@ const createCategory =async ()=>{
           for (let i = 0; i < selectedProducts.value.length; i++) {
             products.push(selectedProducts.value[i].id);
           }
-          if (await categoryStore.addProductToCategory(category,products)){}else{
-            return console.log("Echec de l'opération");
+          if (await categoryStore.addProductToCategory(category,products)){
+            loading.value = false;
+          }else{
+            loading.value = false;
+            errorMessage.value = "Echec de l'ajout  des produits";
+            showErrorMessage.value = true;
+            setTimeout(()=>{
+              router.push({name:'promotion-list'});
+            },2000);
+            return
           }
         }
         await router.push({name:'category-list'});
       }else {
-        return console.log("Echec de l'opération");
+        loading.value = false;
+        errorMessage.value ="Echec de l'opération";
+        showErrorMessage.value = true;
       }
     }
   }else{
-    return console.log("Echec de l'opération");
+    loading.value = false;
+    errorMessage.value ="Veuillez remplir les informations nécéssaire";
+    showErrorMessage.value = true;
   }
 }
 
@@ -143,6 +162,7 @@ watch(()=>productStore.products,(newProducts)=>{
 </script>
 
 <template>
+  <default-error-toast :message="errorMessage" :show="showErrorMessage" />
   <div v-if="userShops && userShops.length>0" class="p-4 mt-24 sm:ml-64">
     <div class="grid grid-cols-8 items-center mx-4 mb-8">
       <div class="col-span-2">
@@ -180,7 +200,10 @@ watch(()=>productStore.products,(newProducts)=>{
         </button>
       </div>
       <category-product-table :products="selectedProducts" @remove-products="productList => removeProductFromCategory(productList)"/>
-      <button type="submit" :disabled="!verifyCreateCategoryFormValues()"  :class="verifyCreateCategoryFormValues()?'bg-appBlue':'bg-blue-400'" class=" self-center w-1/5 border-none font-poppins font-medium text-heading-3 text-white rounded-lg px-2 py-2 m-8 hover:border-none ">Créer la catégorie</button>
+      <button type="submit" :disabled="!verifyCreateCategoryFormValues()"  :class="verifyCreateCategoryFormValues()?'bg-appBlue':'bg-blue-400'" class=" flex justify-center w-1/5 border-none font-poppins font-medium text-heading-3 text-white rounded-lg px-2 py-2 m-8 hover:border-none ">
+        <default-loader v-if="loading" :loading="loading"/>
+        <span v-else >Créer la catégorie</span>
+      </button>
     </form>
     <!-- Add product modal  -->
     <div id="add-product-modal" tabindex="-1" class="hidden overflow-y-auto overflow-x-hidden fixed top-0 right-0 left-0 z-50 justify-center items-center w-full md:inset-0 h-[calc(100%-1rem)] max-h-full">

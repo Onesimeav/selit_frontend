@@ -5,9 +5,17 @@
   import { initFlowbite } from 'flowbite'
   import PreviousPageButton from '@/components/shop/PreviousPageButton.vue'
   import type { CreateShop } from '@/requests/create-shop'
+  import DefaultErrorToast from '@/components/utils/DefaultErrorToast.vue'
+  import DefaultLoader from '@/components/utils/DefaultLoader.vue'
 
   const shopStore = useDashboardShopStore();
   const router = useRouter();
+
+  const loading = ref(false);
+  const errorMessage = ref<string>();
+  const showErrorToast = ref<boolean>(false);
+
+
 
   const shopDetails = ref<{
     name:string,
@@ -47,6 +55,8 @@
   }
 
   const createShop =async ()=>{
+    loading.value = true;
+    showErrorToast.value = false;
    if (verifyCreateShopFormValues() && shopDetails.value.banner!==null && shopDetails.value.logo!==null){
      const query:CreateShop = {
        name:shopDetails.value.name,
@@ -57,11 +67,17 @@
        productType:'Physic',
      }
      if (await shopStore.createShop(query)){
-       console.log("Opération réussie");
+       loading.value = false;
        await router.push({name:'shop-list'});
      }else{
-       console.log("Echec de l'opération");
+       loading.value = false;
+       errorMessage.value='Echec de l\'opération';
+       showErrorToast.value = true;
      }
+   }else{
+     loading.value = false;
+     errorMessage.value='Informations incorrectes';
+     showErrorToast.value = true;
    }
   }
 
@@ -70,6 +86,7 @@
 </script>
 
 <template>
+  <default-error-toast :message="errorMessage" :show="showErrorToast"/>
   <div class="p-4 mt-24 sm:ml-64">
     <div class="grid grid-cols-8 items-center mx-4 mb-8">
       <div class="col-span-2">
@@ -84,7 +101,7 @@
       <div class="grid grid-cols-8 mb-8 justify-around">
         <div class="col-span-3 mx-4">
             <label for="name" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Nom</label>
-            <input type="text" id="name" v-model="shopDetails.name" class="w-full bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" placeholder="La paire de futur" required />
+            <input type="text" id="name" v-model="shopDetails.name" class="w-full bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" placeholder="Benin Shop" required />
         </div>
         <div class="col-span-3 mx-4">
           <div>
@@ -108,7 +125,10 @@
         <input @change="addLogo()" class="block w-full lg:w-2/3 text-sm text-gray-900 border border-gray-300 rounded-lg cursor-pointer bg-gray-50 dark:text-gray-400 focus:outline-none dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400" id="logo" type="file" required>
       </div>
 
-      <button type="submit" :disabled="!verifyCreateShopFormValues()"  :class="verifyCreateShopFormValues()?'bg-appBlue':'bg-blue-400'" class=" self-center w-1/5 border-none font-poppins font-medium text-heading-3 text-white rounded-lg px-2 py-2 m-8 hover:border-none ">Créer la boutique</button>
+      <button type="submit" :disabled="!verifyCreateShopFormValues()"  :class="verifyCreateShopFormValues()?'bg-appBlue':'bg-blue-400'" class=" flex justify-center w-1/5 border-none font-poppins font-medium text-heading-3 text-white rounded-lg px-2 py-2 m-8 hover:border-none ">
+        <default-loader v-if="loading" :loading="loading"/>
+        <span v-else > Créer la boutique</span>
+      </button>
     </form>
     </div>
 </template>

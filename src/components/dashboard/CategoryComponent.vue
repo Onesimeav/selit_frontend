@@ -10,6 +10,8 @@ import SearchBarComponent from '@/components/dashboard/SearchBarComponent.vue'
 import DeleteElementModal from '@/components/dashboard/DeleteElementModal.vue'
 import { useRouter } from 'vue-router'
 import { initFlowbite } from 'flowbite'
+import DefaultSuccesToast from '@/components/utils/DefaultSuccesToast.vue'
+import DefaultErrorToast from '@/components/utils/DefaultErrorToast.vue'
 
   const userStore = useUserStore();
   const categoryStore = useDashboardCategoryStore();
@@ -19,7 +21,13 @@ import { initFlowbite } from 'flowbite'
   const page = ref(1);
   const actualShop = ref<number>();
   const searchWord = ref<string>();
-  const categoryToDelete = ref<number>()
+  const categoryToDelete = ref<number>();
+  const loading = ref(false);
+  const errorMessage = ref("");
+  const showErrorMessage = ref(false);
+  const successMessage = ref("");
+  const showSuccessMessage = ref(false);
+
 
   const getCategories = async ()=>{
     while (userStore.loading){
@@ -56,11 +64,18 @@ import { initFlowbite } from 'flowbite'
   };
 
   const deleteCategory = async (categoryId:number)=>{
+    loading.value = true;
+    showErrorMessage.value = false;
+    showSuccessMessage.value = false;
     if (await categoryStore.deleteCategory(categoryId)){
-      console.log("Catégorie supprimée");
+      loading.value=false;
+      successMessage.value = "Catégorie supprimée";
+      showSuccessMessage.value = true;
       await getCategories();
     }else{
-      console.log("Echec de l'opération");
+      loading.value = false;
+      errorMessage.value="Echec de l'opération"
+      showErrorMessage.value = true;
     }
   }
 
@@ -89,6 +104,8 @@ import { initFlowbite } from 'flowbite'
 </script>
 
 <template>
+  <default-error-toast :message="errorMessage" :show="showErrorMessage" />
+  <default-succes-toast :message="successMessage" :show="showSuccessMessage" />
   <div class="p-4 mt-24 sm:ml-64">
     <div v-if="categories">
       <div class="flex justify-between w-full">
@@ -118,7 +135,7 @@ import { initFlowbite } from 'flowbite'
       <div class="flex justify-center ">
         <button @click="loadMore" v-if="categories.total>categories.per_page"  class=" col-span-2 border-2 rounded-full px-4 border-appGray font-poppins font-semibold text-heading-3 text-appBlue hover:text-white hover:bg-appBlue hover:border-appBlue">Voir plus</button>
       </div>
-      <DeleteElementModal element-name="cette catégorie" :element-id="categoryToDelete" @delete-element="elementToDelete => deleteCategory(elementToDelete)" @hide-modal="categoryToDelete=undefined"  />
+      <DeleteElementModal :loading="loading" element-name="cette catégorie" :element-id="categoryToDelete" @delete-element="elementToDelete => deleteCategory(elementToDelete)" @hide-modal="categoryToDelete=undefined"  />
     </div>
     <div v-else class=" w-full justify-center items-center">
       <p class="font-poppins font-normal text-normal-text text-appGray">Aucune catégories disponible</p>

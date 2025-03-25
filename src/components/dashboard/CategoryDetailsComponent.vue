@@ -6,6 +6,7 @@ import { onMounted, ref } from 'vue'
 import type { Category } from '@/models/category'
 import ProductTable from '@/components/dashboard/ProductTable.vue'
 import DeleteElementModal from '@/components/dashboard/DeleteElementModal.vue'
+import DefaultErrorToast from '@/components/utils/DefaultErrorToast.vue'
 
 const categoryStore = useDashboardCategoryStore();
 const route = useRoute();
@@ -14,6 +15,9 @@ const router = useRouter();
 const category= ref<Category>();
 const deleteCategoryId = ref<number>();
 const page = ref<number>(1);
+const loading = ref(false);
+const errorMessage = ref("");
+const showErrorMessage = ref(false);
 
 const getCategoryDetails = async()=>{
   category.value = await categoryStore.getCategory(Number(route.params.id));
@@ -31,14 +35,20 @@ const getCategoryProduct = async ()=>{
 
 const deleteCategory= async ()=>{
   if(deleteCategoryId.value){
+    loading.value = true;
+    showErrorMessage.value = false;
     if (await categoryStore.deleteCategory(deleteCategoryId.value)){
-      console.log('Catégorie supprimée');
+      loading.value = false;
       await router.push({name:'category-list'});
     }else{
-      console.log("Echec de l'opération");
+      loading.value = false;
+      errorMessage.value="Echec de l'opération";
+      showErrorMessage.value = true;
     }
   }else{
-    console.log("Une erreur est survenue");
+    loading.value = false;
+    errorMessage.value ="Une erreur est survenue";
+    showErrorMessage.value = true;
   }
 }
 
@@ -63,6 +73,7 @@ onMounted(()=>{
 </script>
 
 <template>
+  <default-error-toast :message="errorMessage" :show="showErrorMessage" />
   <div class="p-4 mt-24 sm:ml-64">
     <div class="grid grid-cols-8 items-center mx-4 mb-8">
       <div class="col-span-2">
@@ -91,7 +102,7 @@ onMounted(()=>{
       <div v-else class=" w-full justify-center items-center">
         <p class="font-poppins font-normal text-normal-text text-appGray">Aucun produit disponible</p>
       </div>
-      <delete-element-modal element-name="cette catégorie" :element-id="deleteCategoryId" @delete-element="deleteCategory()" />
+      <delete-element-modal :loading="loading" element-name="cette catégorie" :element-id="deleteCategoryId" @delete-element="deleteCategory()" />
     </div>
   </div>
 </template>

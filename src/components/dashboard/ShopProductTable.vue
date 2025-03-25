@@ -3,8 +3,10 @@
   import type { Product } from '@/models/product'
   import { onMounted, ref } from 'vue'
   import { initFlowbite } from 'flowbite'
+  import DefaultLoader from '@/components/utils/DefaultLoader.vue'
 
   const props = defineProps<{
+    loading ? : boolean;
     products: Page<Product>,
     productsToAdd ?: Product[],
   }>();
@@ -75,7 +77,8 @@
   <div v-if="productsToAdd && productsToAdd.length>0" class="relative overflow-x-auto shadow-md sm:rounded-lg m-4">
     <div class="relative justify-items-end end-6 ">
       <button type="button" @click="emit('add-products')" class=" flex justify-around items-center border-none bg-appBlue rounded-lg px-4 py-2 text-white font-poppins font-bold text-normal-text m-2">
-        Ajouter
+        <default-loader v-if="loading" :loading="loading"/>
+        <span v-else > Ajouter</span>
       </button>
     </div>
     <div v-if="selectedProducts.length>0" class="relative justify-items-end end-6 ">

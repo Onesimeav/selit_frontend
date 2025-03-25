@@ -11,11 +11,21 @@ import { useDashboardProductStore } from '@/stores/dashboard/product'
 import ShopProductTable from '@/components/dashboard/ShopProductTable.vue'
 import SearchBarComponent from '@/components/dashboard/SearchBarComponent.vue'
 import ProductTable from '@/components/dashboard/ProductTable.vue'
+import DefaultErrorToast from '@/components/utils/DefaultErrorToast.vue'
+import DefaultSuccesToast from '@/components/utils/DefaultSuccesToast.vue'
+import DefaultLoader from '@/components/utils/DefaultLoader.vue'
+import { l } from 'vite/dist/node/types.d-aGj9QkWt'
 
 const shopStore = useDashboardShopStore();
 const productStore = useDashboardProductStore();
 const route = useRoute();
 
+const loading = ref(false);
+const loadingAddProduct = ref(false);
+const errorMessage = ref<string>();
+const showErrorToast = ref<boolean>(false);
+const showSuccessMessage = ref<boolean>(false);
+const successMessage = ref<string>();
 const shop = ref<Shop>();
 const products = ref<Page<Product>>()
 const page = ref<number>(1);
@@ -52,14 +62,21 @@ const loadMore = async ()=>{
 }
 
 const changeShopStatus= async ()=>{
+  loading.value = true;
+  showErrorToast.value = false;
   if (shop.value){
     if (await shopStore.publishShop(shop.value.id)){
       await getShopDetails();
+      loading.value = false;
     }else{
-      console.log("Echec de l'opération")
+      loading.value = false;
+      errorMessage.value="Echec de l'opération";
+      showErrorToast.value = true;
     }
   }else{
-    console.log("Une erreur est survenue");
+    loading.value = false;
+    errorMessage.value="Une erreur est survenue";
+    showErrorToast.value = true;
   }
 
 }
@@ -100,7 +117,10 @@ const getUserProducts = async ()=>{
 }
 
 const addProducts = async ()=>{
-  if (shop.value &&selectedProducts.value && selectedProducts.value.length>0){
+  if (shop.value && selectedProducts.value && selectedProducts.value.length>0){
+    loadingAddProduct.value = true;
+    showErrorToast.value = false;
+    showSuccessMessage.value=false;
     const productList:number[]=[];
     selectedProducts.value.forEach(product=>{
       productList.push(product.id);
@@ -108,9 +128,13 @@ const addProducts = async ()=>{
     if (await shopStore.addProducts(shop.value.id,productList)){
       selectedProducts.value = [];
       await getShopProducts();
-      console.log('Opération réussie');
+      loadingAddProduct.value = false;
+      successMessage.value = "Produits ajouté"
+      showSuccessMessage.value = true;
     }else{
-      console.log("Echec de l'opération");
+      loadingAddProduct.value = false;
+      errorMessage.value='Identifiants incorrectes';
+      showErrorToast.value = true;
     }
   }
 }
@@ -142,6 +166,8 @@ onMounted(async()=>{
 </script>
 
 <template>
+  <default-succes-toast :message="successMessage" :show="showSuccessMessage" />
+  <default-error-toast :message="errorMessage" :show="showErrorToast"/>
   <div class="p-4 mt-24 sm:ml-64">
     <div class="grid grid-cols-8 items-center mx-4 mb-8">
       <div class="col-span-2">
@@ -153,8 +179,14 @@ onMounted(async()=>{
     </div>
     <div v-if="shop">
       <div class="flex justify-end items-center mb-5">
-        <button @click="changeShopStatus()" v-if="shop.publish" type="button" class="bg-green-500 rounded-lg font-semibold font-poppins text-heading-3 text-white px-4 py-1">Désactiver</button>
-        <button @click="changeShopStatus()" v-else type="button" class="bg-appGray rounded-lg font-semibold font-poppins text-heading-3 text-white px-4 py-1">Activer</button>
+        <button @click="changeShopStatus()" v-if="shop.publish" type="button" class="bg-green-500 rounded-lg font-semibold font-poppins text-heading-3 text-white px-4 py-1">
+          <default-loader v-if="loading" :loading="loading"/>
+          <span v-else >Désactiver</span>
+        </button>
+        <button @click="changeShopStatus()" v-else type="button" class="bg-appGray rounded-lg font-semibold font-poppins text-heading-3 text-white px-4 py-1">
+          <default-loader v-if="loading" :loading="loading"/>
+          <span v-else >Activer</span>
+        </button>
       </div>
       <div class="relative py-2.5 bg-center bg-cover h-full w-full rounded-xl my-5 px-6" :style="{backgroundImage:`url(${shop.banner})` } ">
         <div id="navbarChild" class="container">
@@ -186,7 +218,7 @@ onMounted(async()=>{
           Ajouter
         </button>
       </div>
-      <shop-product-table v-if="products" :products="products" :products-to-add="selectedProducts" @remove-products="productList => removeProductFromShop(productList)" @add-products="addProducts()" @load-more="loadMore()"/>
+      <shop-product-table v-if="products" :loading="loadingAddProduct" :products="products" :products-to-add="selectedProducts" @remove-products="productList => removeProductFromShop(productList)" @add-products="addProducts()" @load-more="loadMore()"/>
     </div>
   </div>
 
