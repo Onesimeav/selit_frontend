@@ -14,7 +14,6 @@ import ProductTable from '@/components/dashboard/ProductTable.vue'
 import DefaultErrorToast from '@/components/utils/DefaultErrorToast.vue'
 import DefaultSuccesToast from '@/components/utils/DefaultSuccesToast.vue'
 import DefaultLoader from '@/components/utils/DefaultLoader.vue'
-import { l } from 'vite/dist/node/types.d-aGj9QkWt'
 
 const shopStore = useDashboardShopStore();
 const productStore = useDashboardProductStore();
